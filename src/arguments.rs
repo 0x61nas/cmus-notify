@@ -22,8 +22,9 @@ pub struct Arguments {
     /// The path to look for the cover image, if not given, the cover will be searched in the track's directory
     /// for an image file with the name "cover".
     ///
-    /// You can use the placeholder "{artist}" and "{album}" and "{title}" in the path,
-    /// they will be replaced with the corresponding metadata.
+    /// You can use the placeholder "{artist}" and "{album}" and "{title}" and "{track_number}" and
+    /// "{disc_number}" and "{year}" and "{genre}" in the path, they will be replaced with the corresponding metadata.
+    /// but if the metadata is not available, the placeholder will be replaced with an empty string.
     /// And you can use the simple glob pattern `*` to match any character.
     /// e.g. "covers/{artist}/{album}/cover.*", "covers/{artist}/{album}/*",
     ///
@@ -34,8 +35,9 @@ pub struct Arguments {
     /// The lyrics file path, if not given, the lyrics will be searched in the track's directory
     /// for a text file with the name "lyrics", or with the same name as the track.
     ///
-    /// You can use the placeholder "{artist}" and "{album}" and "{title}" in the path,
-    /// they will be replaced with the corresponding metadata.
+    /// You can use the placeholder "{artist}" and "{album}" and "{title}" and "{track_number}" and
+    /// "{disc_number}" and "{year}" and "{genre}" in the path, they will be replaced with the corresponding metadata.
+    /// but if the metadata is not available, the placeholder will be replaced with an empty string.
     /// And you can use the simple glob pattern `*` to match any character.
     /// e.g. "lyrics/{artist}/{album}/{title}.lrc", "lyrics/{artist}/{album}/*",
     ///

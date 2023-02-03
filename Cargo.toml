@@ -15,6 +15,6 @@ version = "4.1.4"
 features = ["wrap_help", "cargo", "usage", "derive", "suggestions", "color"]
 
 [features]
-lyirc = ["lrc"]
+lyrics = ["lrc"]
 
-default = []
+default = ["lyrics"]

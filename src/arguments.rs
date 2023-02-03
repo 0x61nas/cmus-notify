@@ -1,10 +1,16 @@
-use clap::{Parser};
+use clap::Parser;
+
+const NOTIFICATION_TIMEOUT: &str = "5";
+const NOTIFICATION_BODY: &str = "<b>Playing:</b> {title} from {album} \n\n <b>Artist:</b> {artist} - {year}";
+const NOTIFICATION_SUMMARY: &str = "{artist} - {title}";
+const NOTIFICATION_APP_NAME: &str = "C* Music Player";
+const DEFAULT_MAX_DEPTH: &str = "3";
 
 #[derive(Parser, Debug)]
 #[command(author, about, version, long_about = None)]
 pub struct Arguments {
     /// The notification timeout, in seconds
-    #[arg(short, long, default_value = "5")]
+    #[arg(short, long, default_value = NOTIFICATION_TIMEOUT)]
     pub timeout: u8,
     /// Make the notification persistent, i.e. not disappear after a timeout (you can dismiss it manually)
     #[arg(short, long)]
@@ -48,10 +54,10 @@ pub struct Arguments {
     /// if the files are not found in the track's directory, or the directory specified by the `--cover-path`
     /// or `--lyrics-path`* options, the program will search in the parent directory,
     /// and so on, until the maximum depth is reached.
-    #[arg(short, long, default_value = "3")]
+    #[arg(short, long, default_value = DEFAULT_MAX_DEPTH)]
     pub depth: u8,
     /// The name of the app to use for the notification.
-    #[arg(short, long, default_value = "C* Music Player")]
+    #[arg(short, long, default_value = NOTIFICATION_APP_NAME)]
     pub app_name: String,
     /// The summary of the notification.
     ///
@@ -59,7 +65,7 @@ pub struct Arguments {
     /// "{disc_number}" and "{year}" and "{genre}" in the summary, they will be replaced with the corresponding metadata.
     /// but if the metadata is not available, the placeholder will be replaced with an empty string.
     /// e.g. "{artist} - {title}"
-    #[arg(short, long, default_value = "{artist} - {title}")]
+    #[arg(short, long, default_value = NOTIFICATION_SUMMARY)]
     pub summary: String,
     #[cfg(feature = "lyrics")]
     /// The body of the notification.
@@ -78,7 +84,7 @@ pub struct Arguments {
     /// the notification will be persistent, and you need to dismiss it manually tow times.
     ///
     /// Also you can use the simple html markup, if your notification server supports it.
-    #[arg(default_value = "<b>Playing:</b> {title} from {album} \n\n <b>Artist:</b> {artist} - {year}")]
+    #[arg(default_value = NOTIFICATION_BODY)]
     pub body: String,
     #[cfg(not(feature = "lyrics"))]
     /// The body of the notification.
@@ -93,6 +99,6 @@ pub struct Arguments {
     /// the notification will be persistent, and you need to dismiss it manually tow times.
     ///
     /// Also you can use the simple html markup, if your notification server supports it.
-    #[arg(default_value = "<b>Playing:</b> {title} from {album} \n\n <b>Artist:</b> {artist} - {year}")]
+    #[arg(default_value = NOTIFICATION_BODY)]
     pub body: String,
 }

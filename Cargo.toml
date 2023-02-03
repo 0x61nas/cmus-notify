@@ -1,0 +1,20 @@
+[package]
+name = "cmus-notify"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lrc = { version = "0.1.7", optional = true }
+notify-rust = { version = "4.7.0", features = ["images"] }
+walkdir = "2.3.2"
+
+[dependencies.clap]
+version = "4.1.4"
+features = ["wrap_help", "cargo", "usage", "derive", "suggestions", "color"]
+
+[features]
+lyirc = ["lrc"]
+
+default = []

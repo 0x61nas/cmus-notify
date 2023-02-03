@@ -10,14 +10,14 @@ pub struct Arguments {
     #[arg(short, long)]
     pub persistent: bool,
     /// Show the track cover in the notification, if available
-    #[clap(short = 'c', long = "cover")]
+    #[arg(short = 'c', long = "cover")]
     pub show_track_cover: bool,
     /// The static icon to use for the notification, it not effective if the track cover is shown,
     /// but if the cover is not available or you disabled it, this icon will be used.
     ///
     /// you can give it the full path to an image file or a name of an icon from the current icon theme
     /// (e.g. "audio-x-generic" or "spotify-client")
-    #[clap(short = 'i', long = "icon", default_value = None)]
+    #[arg(short = 'i', long = "icon", default_value = None)]
     pub notification_static_icon: Option<String>,
     /// The path to look for the cover image, if not given, the cover will be searched in the track's directory
     /// for an image file with the name "cover".
@@ -29,7 +29,7 @@ pub struct Arguments {
     /// e.g. "covers/{artist}/{album}/cover.*", "covers/{artist}/{album}/*",
     ///
     /// If you not specify the full path, the cover will be started from the track's directory.
-    #[clap(short = 'w', long = "cover-path", default_value = None)]
+    #[arg(short = 'w', long = "cover-path", default_value = None)]
     pub cover_path: Option<String>,
     #[cfg(feature = "lyrics")]
     /// The lyrics file path, if not given, the lyrics will be searched in the track's directory

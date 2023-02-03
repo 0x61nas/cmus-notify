@@ -50,4 +50,49 @@ pub struct Arguments {
     /// and so on, until the maximum depth is reached.
     #[arg(short, long, default_value = "3")]
     pub depth: u8,
+    /// The name of the app to use for the notification.
+    #[arg(short, long, default_value = "C* Music Player")]
+    pub app_name: String,
+    /// The summary of the notification.
+    ///
+    /// you can use the placeholder "{artist}" and "{album}" and "{title}" and "{track_number}" and
+    /// "{disc_number}" and "{year}" and "{genre}" in the summary, they will be replaced with the corresponding metadata.
+    /// but if the metadata is not available, the placeholder will be replaced with an empty string.
+    /// e.g. "{artist} - {title}"
+    #[arg(short, long, default_value = "{artist} - {title}")]
+    pub summary: String,
+    #[cfg(feature = "lyrics")]
+    /// The body of the notification.
+    /// you can use the placeholder "{artist}" and "{album}" and "{title}" and "{track_number}" and
+    /// "{disc_number}" and "{year}" and "{genre}" in the body, they will be replaced with the corresponding metadata.
+    /// but if the metadata is not available, the placeholder will be replaced with an empty string.
+    ///
+    /// And you can use the placeholder "{lyrics}" to show the lyrics of the track, if available.
+    /// But if you use this placeholder, the notification will be persistent, and you need to dismiss it manually tow times.
+    ///
+    /// Also you can use the placeholder "{progress}" to show the progress of the track, in the format "00:00 / 00:00".
+    ///
+    /// Also you can use the placeholder "{progress_bar}" to show the progress bar of the track.
+    ///
+    /// Like the "{lyrics}" placeholder, if you use the "{progress}" or "{progress_bar}" placeholder,
+    /// the notification will be persistent, and you need to dismiss it manually tow times.
+    ///
+    /// Also you can use the simple html markup, if your notification server supports it.
+    #[arg(default_value = "<b>Playing:</b> {title} from {album} \n\n <b>Artist:</b> {artist} - {year}")]
+    pub body: String,
+    #[cfg(not(feature = "lyrics"))]
+    /// The body of the notification.
+    /// you can use the placeholder "{artist}" and "{album}" and "{title}" and "{track_number}" and
+    /// "{disc_number}" and "{year}" and "{genre}" in the body, they will be replaced with the corresponding metadata.
+    /// but if the metadata is not available, the placeholder will be replaced with an empty string.
+    ///
+    /// And you can use the placeholder "{progress}" to show the progress of the track, in the format "00:00 / 00:00".
+    /// Also you can use the placeholder "{progress_bar}" to show the progress bar of the track.
+    ///
+    /// But if you use the "{progress}" or "{progress_bar}" placeholder,
+    /// the notification will be persistent, and you need to dismiss it manually tow times.
+    ///
+    /// Also you can use the simple html markup, if your notification server supports it.
+    #[arg(default_value = "<b>Playing:</b> {title} from {album} \n\n <b>Artist:</b> {artist} - {year}")]
+    pub body: String,
 }

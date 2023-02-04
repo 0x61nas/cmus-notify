@@ -1,0 +1,30 @@
+status playing
+file /mnt/Data/Music/FLAC/Alex Goot/Alex Goot - Alex Goot & Friends, Vol. 3/08 - Photograph.mp3
+duration 284
+position 226
+tag artist Alex Goot
+tag album Alex Goot & Friends, Vol. 3
+tag title Photograph
+tag date 2014
+tag genre Pop
+tag discnumber 1
+tag tracknumber 8
+tag albumartist Alex Goot
+tag replaygain_track_gain -9.4 dB
+tag composer Chad Kroeger
+tag label mudhutdigital.com
+tag publisher mudhutdigital.com
+tag bpm 146
+set aaa_mode artist
+set continue true
+set play_library true
+set play_sorted true
+set replaygain disabled
+set replaygain_limit true
+set replaygain_preamp 0.000000
+set repeat false
+set repeat_current false
+set shuffle tracks
+set softvol false
+set vol_left 46
+set vol_right 46

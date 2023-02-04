@@ -1,4 +1,7 @@
+#![feature(assert_matches)]
+
 mod arguments;
+mod cmus;
 
 use clap::Parser;
 

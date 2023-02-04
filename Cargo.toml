@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 lrc = { version = "0.1.7", optional = true }
 notify-rust = { version = "4.7.0", features = ["images"] }
+typed-builder = "0.12.0"
 walkdir = "2.3.2"
 
 [dependencies.clap]

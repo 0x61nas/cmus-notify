@@ -3,7 +3,7 @@ use std::num::ParseIntError;
 use std::str::FromStr;
 use typed_builder::TypedBuilder;
 
-#[derive(Debug, PartialEq, TypedBuilder)]
+#[derive(Debug, PartialEq)]
 pub struct TrackMetadata {
     tags: HashMap<String, String>,
 }

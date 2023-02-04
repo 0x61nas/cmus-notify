@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::Display;
 use std::num::ParseIntError;
 use std::str::FromStr;
 use typed_builder::TypedBuilder;
@@ -24,21 +25,46 @@ pub struct Track {
     pub position: u32,
 }
 
+#[derive(Debug)]
+pub enum CmusError {
+    CmusRunningError(String),
+    UnknownStatus,
+    NoStatus,
+    EmptyPath,
+    DurationError(String),
+    PositionError(String),
+    UnknownError(String)
+}
+
+impl Display for CmusError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CmusError::CmusRunningError(s) => write!(f, "Cmus running error: {}", s),
+            CmusError::UnknownStatus => write!(f, "Unknown status"),
+            CmusError::NoStatus => write!(f, "No status"),
+            CmusError::EmptyPath => write!(f, "Empty path"),
+            CmusError::DurationError(s) => write!(f, "Duration error: {}", s),
+            CmusError::PositionError(s) => write!(f, "Position error: {}", s),
+            CmusError::UnknownError(s) => write!(f, "Unknown error: {}", s),
+        }
+    }
+}
+
 impl FromStr for TrackStatus {
-    type Err = String;
+    type Err = CmusError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "playing" => Ok(TrackStatus::Playing),
             "paused" => Ok(TrackStatus::Paused),
             "stopped" => Ok(TrackStatus::Stopped),
-            _ => Err(format!("Unknown status: {}", s)),
+            _ => Err(CmusError::UnknownStatus),
         }
     }
 }
 
 impl FromStr for Track {
-    type Err = String;
+    type Err = CmusError;
 
     /// Creates a `Track` from the output of `cmus-remote -Q`.
     ///
@@ -49,18 +75,20 @@ impl FromStr for Track {
         let mut lines = s.lines();
 
         Ok(Track::builder().status(
-            TrackStatus::from_str(lines.next().ok_or("Missing status")?.split_once(' ')
-                .ok_or("Unknown status")?.1)?
+            TrackStatus::from_str(lines.next().ok_or(CmusError::NoStatus)?.split_once(' ')
+                .ok_or(CmusError::NoStatus)?.1)?
         )
-            .path(lines.next().ok_or("Missing path")?.split_once(' ')
-                .ok_or("Empty path")?.1.to_string())
+            .path(lines.next().ok_or(CmusError::EmptyPath)?.split_once(' ')
+                .ok_or(CmusError::EmptyPath)?.1.to_string())
             .duration(
-                lines.next().ok_or("Missing duration")?.split_once(' ')
-                    .ok_or("Empty duration")?.1.parse().map_err(|e: ParseIntError| e.to_string())?
+                lines.next().ok_or(CmusError::DurationError("Missing duration".to_string()))?.split_once(' ')
+                    .ok_or(CmusError::DurationError("Empty duration".to_string()))?.1.parse()
+                    .map_err(|e: ParseIntError| CmusError::DurationError(e.to_string()))?
             )
             .position(
-                lines.next().ok_or("Missing position")?.split_once(' ')
-                    .ok_or("Empty position")?.1.parse().map_err(|e: ParseIntError| e.to_string())?
+                lines.next().ok_or(CmusError::PositionError("Missing position".to_string()))?.split_once(' ')
+                    .ok_or(CmusError::PositionError("Empty position".to_string()))?.1.parse()
+                    .map_err(|e: ParseIntError| CmusError::PositionError(e.to_string()))?
             )
             .metadata(TrackMetadata::parse(lines))
             .build())
@@ -103,6 +131,38 @@ impl Track {
         self.metadata.get("title").unwrap_or_else(|| self.path.split('/').last()
             .unwrap_or("").split_once(".").unwrap_or(("", "")).0).to_string()
     }
+}
+
+/// Make a status request to cmus.
+/// And collect the output, and parse it into a `Track`.
+/// If the cmus is not running, or the socket is not available, this function will return an error.
+pub fn get_track(cmus_remote_bin: &[&str], socket_addr: Option<&str>, socket_pass: Option<&str>) -> Result<Track, CmusError> {
+    let mut command = std::process::Command::new(cmus_remote_bin[0]);
+
+    for arg in cmus_remote_bin.iter().skip(1) {
+        command.arg(arg);
+    }
+
+    if let Some(socket_addr) = socket_addr {
+        command.arg("--server").arg(socket_addr); // Use the socket instead of the default socket.
+    }
+
+    if let Some(socket_pass) = socket_pass {
+        command.arg("--passwd").arg(socket_pass);
+    }
+
+    command.arg("-Q");
+
+    let output = command.output().map_err(|e| CmusError::CmusRunningError(e.to_string()))?;
+
+    if !output.status.success() {
+        return Err(CmusError::CmusRunningError(String::from_utf8(output.stderr)
+            .map_err(|e| CmusError::UnknownError(e.to_string()))?));
+    }
+
+    let output = String::from_utf8(output.stdout).map_err(|e| CmusError::UnknownError(e.to_string()))?;
+
+    Track::from_str(&output).map_err(|e| CmusError::UnknownError(e.to_string()))
 }
 
 
@@ -173,5 +233,15 @@ mod tests {
         assert_eq!(metadata.tags.get("label"), Some(&"mudhutdigital.com".to_string()));
         assert_eq!(metadata.tags.get("publisher"), Some(&"mudhutdigital.com".to_string()));
         assert_eq!(metadata.tags.get("bpm"), Some(&"146".to_string()));
+    }
+
+    #[test]
+    #[ignore]
+    fn test_get_track() {
+        let track = get_track(&["cmus-remote"], None, None);
+
+        assert_matches!(track, Ok(_));
+
+        println!("{:?}", track);
     }
 }

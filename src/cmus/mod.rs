@@ -95,6 +95,16 @@ impl TrackMetadata {
     }
 }
 
+impl Track {
+    /// Returns the name of the track.
+    ///
+    /// This is the title, if it exists, otherwise it's the file name without the extension.
+    pub fn get_name(&self) -> String {
+        self.metadata.get("title").unwrap_or_else(|| self.path.split('/').last()
+            .unwrap_or("").split_once(".").unwrap_or(("", "")).0).to_string()
+    }
+}
+
 
 #[cfg(test)]
 mod tests {

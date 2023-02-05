@@ -136,11 +136,32 @@ impl Track {
 /// Make a status request to cmus.
 /// And collect the output, and parse it into a `Track`.
 /// If the cmus is not running, or the socket is not available, this function will return an error.
-pub fn get_track(cmus_remote_bin: &[&str], socket_addr: Option<&str>, socket_pass: Option<&str>) -> Result<Track, CmusError> {
-    let mut command = std::process::Command::new(cmus_remote_bin[0]);
+#[inline]
+pub fn get_track(query_command: &mut std::process::Command) -> Result<Track, CmusError> {
+    // Just run the command, and collect the output.
+    let output = query_command.output().map_err(|e| CmusError::CmusRunningError(e.to_string()))?;
 
-    for arg in cmus_remote_bin.iter().skip(1) {
-        command.arg(arg);
+    if !output.status.success() {
+        return Err(CmusError::CmusRunningError(String::from_utf8(output.stderr)
+            .map_err(|e| CmusError::UnknownError(e.to_string()))?));
+    }
+
+    let output = String::from_utf8(output.stdout).map_err(|e| CmusError::UnknownError(e.to_string()))?;
+
+    Track::from_str(&output).map_err(|e| CmusError::UnknownError(e.to_string()))
+}
+
+/// Build the query command.
+/// This function it should call only one time entire the program life time, So it makes sense to make it inline.
+/// This function will return a `std::process::Command` that can be used to query cmus, you should store it in a variable :).
+#[inline(always)]
+pub fn build_query_command(cmus_remote_bin: &str, socket_addr: &Option<String>, socket_pass: &Option<String>) -> std::process::Command {
+    let cmd_arr = cmus_remote_bin.split_whitespace().collect::<Vec<_>>();
+    let mut command = std::process::Command::new(cmd_arr[0]);
+
+    // If there are more than 1 slice, then add the rest of the slices as arguments.
+    if cmd_arr.len() > 1 {
+        command.args(&cmd_arr[1..]);
     }
 
     if let Some(socket_addr) = socket_addr {
@@ -153,16 +174,7 @@ pub fn get_track(cmus_remote_bin: &[&str], socket_addr: Option<&str>, socket_pas
 
     command.arg("-Q");
 
-    let output = command.output().map_err(|e| CmusError::CmusRunningError(e.to_string()))?;
-
-    if !output.status.success() {
-        return Err(CmusError::CmusRunningError(String::from_utf8(output.stderr)
-            .map_err(|e| CmusError::UnknownError(e.to_string()))?));
-    }
-
-    let output = String::from_utf8(output.stdout).map_err(|e| CmusError::UnknownError(e.to_string()))?;
-
-    Track::from_str(&output).map_err(|e| CmusError::UnknownError(e.to_string()))
+    command
 }
 
 
@@ -236,12 +248,34 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
-    fn test_get_track() {
-        let track = get_track(&["cmus-remote"], None, None);
+    fn test_build_the_query_command_with_no_custom_socket_and_no_pass() {
+        let command = build_query_command("cmus-remote", &None, &None);
 
-        assert_matches!(track, Ok(_));
+        assert_eq!(command.get_program(), "cmus-remote");
+        assert_eq!(command.get_args().collect::<Vec<_>>(), &["-Q"]);
+    }
 
-        println!("{:?}", track);
+    #[test]
+    fn test_build_the_query_command_with_custom_socket_and_no_pass() {
+        let command = build_query_command("cmus-remote", &Some("/tmp/cmus-socket".to_string()), &None);
+
+        assert_eq!(command.get_program(), "cmus-remote");
+        assert_eq!(command.get_args().collect::<Vec<_>>(), &["--server", "/tmp/cmus-socket", "-Q"]);
+    }
+
+    #[test]
+    fn test_build_the_query_command_with_custom_socket_and_pass() {
+        let command = build_query_command("cmus-remote", &Some("/tmp/cmus-socket".to_string()), &Some("pass".to_string()));
+
+        assert_eq!(command.get_program(), "cmus-remote");
+        assert_eq!(command.get_args().collect::<Vec<_>>(), &["--server", "/tmp/cmus-socket", "--passwd", "pass", "-Q"]);
+    }
+
+    #[test]
+    fn test_build_the_query_command_with_custom_bin_path() {
+        let command = build_query_command("flatpak run io.github.cmus.cmus", &None, &None);
+
+        assert_eq!(command.get_program(), "flatpak");
+        assert_eq!(command.get_args().collect::<Vec<_>>(), &["run", "io.github.cmus.cmus", "-Q"]);
     }
 }

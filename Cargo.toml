@@ -9,7 +9,6 @@ edition = "2021"
 lrc = { version = "0.1.7", optional = true }
 notify-rust = { version = "4.7.0", features = ["images"] }
 typed-builder = "0.12.0"
-walkdir = "2.3.2"
 
 [dependencies.clap]
 version = "4.1.4"
@@ -19,3 +18,6 @@ features = ["wrap_help", "cargo", "usage", "derive", "suggestions", "color"]
 lyrics = ["lrc"]
 
 default = ["lyrics"]
+
+[dev-dependencies]
+test-context = "0.1.4"

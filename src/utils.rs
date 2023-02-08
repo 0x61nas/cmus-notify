@@ -1,10 +1,34 @@
+use std::path::Path;
 use crate::cmus;
 
-pub fn search_for_cover_image(search_directory: &str, max_depth: u8) -> Option<String> {
-
-
-
-    None
+/// Search in the track directory for the cover image or the lyrics(depending on the `regx`).
+/// If the cover image or the lyrics is not found, search in the parent directory, and so on, until the max depth is reached.
+/// If the cover image or the lyrics is not found, return `None`.
+pub fn search_for(search_directory: &str, max_depth: u8, regx: &[&str]) -> std::io::Result<Option<String>> {
+    // Search in the track directory.
+    for entry in std::fs::read_dir(search_directory)? {
+        if let Ok(entry) = entry {
+            if let Ok(file_type) = entry.file_type() {
+                if file_type.is_file() {
+                    let Ok(file_name) = entry.file_name().into_string() else { continue; };
+                    // Check if the file name matches any of the regular expressions.
+                    if regx.iter().any(|&regx| file_name.contains(regx)) {
+                        let path = entry.path();
+                        let Some(path) = path.to_str() else { continue; };
+                        return Ok(Some(path.to_string()));
+                    }
+                }
+            }
+        }
+    }
+    // If the max depth is reached, return `None`.
+    if max_depth == 0 {
+        Ok(None)
+    } else { // If the max depth is not reached, search in the parent directory (recursively).
+        let Some(parent) = Path::new(search_directory).parent() else { return Ok(None); };
+        let Some(parent) = parent.to_str() else { return Ok(None); };
+        search_for(parent, max_depth - 1, regx)
+    }
 }
 
 /// Replace all the placeholders in the template with their matching value.

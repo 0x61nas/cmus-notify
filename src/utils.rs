@@ -7,16 +7,38 @@ use std::path::Path;
 pub fn search_for(
     search_directory: &str,
     max_depth: u8,
-    regx: &str,
-) -> Result<Option<String>, String> {
-    // Search in the track directory.
-    for entry in std::fs::read_dir(search_directory).map_err(|e| e.to_string())? {
+    regx: &regex::Regex,
+) -> std::io::Result<Option<String>> {
+    let mut max_depth = max_depth;
+    let mut search_directory = search_directory;
+
+    loop {
+        if let Some(path) = search(search_directory, regx)? {
+            return Ok(Some(path));
+        }
+
+        if max_depth == 0 {
+            break Ok(None);
+        } else {
+            // If the max depth is not reached, search in the parent directory.
+            max_depth -= 1;
+            search_directory = {
+                let Some(parent) = Path::new(search_directory).parent() else { return Ok(None); };
+                let Some(parent) = parent.to_str() else { return Ok(None); };
+                parent
+            };
+        }
+    }
+}
+
+#[inline]
+fn search(search_directory: &str, matcher: &regex::Regex) -> std::io::Result<Option<String>> {
+    for entry in std::fs::read_dir(search_directory)? {
         let Ok(entry) = entry else { continue; };
         let Ok(file_type) = entry.file_type() else { continue; };
         if file_type.is_file() {
             let Ok(file_name) = entry.file_name().into_string() else { continue; };
             // Check if the file name matches the regular expression.
-            let matcher = regex::Regex::new(regx).map_err(|e| e.to_string())?;
             if matcher.is_match(&file_name) {
                 let path = entry.path();
                 let Some(path) = path.to_str() else { continue; };
@@ -24,15 +46,7 @@ pub fn search_for(
             }
         }
     }
-    // If the max depth is reached, return `None`.
-    if max_depth == 0 {
-        Ok(None)
-    } else {
-        // If the max depth is not reached, search in the parent directory (recursively).
-        let Some(parent) = Path::new(search_directory).parent() else { return Ok(None); };
-        let Some(parent) = parent.to_str() else { return Ok(None); };
-        search_for(parent, max_depth - 1, regx)
-    }
+    Ok(None)
 }
 
 /// Replace all the placeholders in the template with their matching value.
@@ -101,7 +115,7 @@ mod tests {
         let cover_path = search_for(
             "tests/samples/Owl City/Cinematic/cover",
             1,
-            r"cover|.\.jpg|.\.png",
+            &regex::Regex::new(r"cover|.\.jpg|.\.png").unwrap(),
         );
 
         assert_matches!(cover_path, Ok(Some(_)));
@@ -114,7 +128,10 @@ mod tests {
     #[test]
     fn test_search_for_cover_without_the_cover_key_world() {
         let cover_path = search_for(
-            "tests/samples/Owl City/Cinematic/cover", 1, r".\.jpg|.\.png");
+            "tests/samples/Owl City/Cinematic/cover",
+            1,
+            &regex::Regex::new(r".\.jpg|.\.png").unwrap(),
+        );
 
         assert_matches!(cover_path, Ok(Some(_)));
         assert_eq!(
@@ -126,7 +143,10 @@ mod tests {
     #[test]
     fn test_search_for_cover_without_the_cover_key_world_and_jpg() {
         let cover_path = search_for(
-            "tests/samples/Owl City/Cinematic/cover", 1, r".\.png");
+            "tests/samples/Owl City/Cinematic/cover",
+            1,
+            &regex::Regex::new(r".\.png").unwrap(),
+        );
 
         assert_matches!(cover_path, Ok(Some(_)));
         assert_eq!(
@@ -138,7 +158,10 @@ mod tests {
     #[test]
     fn test_search_for_lrc_file_started_from_the_cover_directory() {
         let lrc_path = search_for(
-            "tests/samples/Owl City/Cinematic/cover", 1, r".\.lrc");
+            "tests/samples/Owl City/Cinematic/cover",
+            1,
+            &regex::Regex::new(r".\.lrc").unwrap(),
+        );
 
         assert_matches!(lrc_path, Ok(Some(_)));
         assert_eq!(
@@ -150,7 +173,10 @@ mod tests {
     #[test]
     fn test_search_for_not_exits_file() {
         let result = search_for(
-            "tests/samples/Owl City/Cinematic/cover", 3, r".\.mp3");
+            "tests/samples/Owl City/Cinematic/cover",
+            3,
+            &regex::Regex::new(r".\.mp3").unwrap(),
+        );
 
         assert_matches!(result, Ok(None));
     }

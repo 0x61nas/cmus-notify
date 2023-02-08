@@ -146,4 +146,12 @@ mod tests {
             "tests/samples/Owl City/Cinematic/08 - Always.lrc"
         );
     }
+
+    #[test]
+    fn test_search_for_not_exits_file() {
+        let result = search_for(
+            "tests/samples/Owl City/Cinematic/cover", 3, r".\.mp3");
+
+        assert_matches!(result, Ok(None));
+    }
 }

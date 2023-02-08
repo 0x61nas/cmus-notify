@@ -11,17 +11,15 @@ pub fn search_for(
 ) -> std::io::Result<Option<String>> {
     // Search in the track directory.
     for entry in std::fs::read_dir(search_directory)? {
-        if let Ok(entry) = entry {
-            if let Ok(file_type) = entry.file_type() {
-                if file_type.is_file() {
-                    let Ok(file_name) = entry.file_name().into_string() else { continue; };
-                    // Check if the file name matches any of the regular expressions.
-                    if regx.iter().any(|&regx| file_name.contains(regx)) {
-                        let path = entry.path();
-                        let Some(path) = path.to_str() else { continue; };
-                        return Ok(Some(path.to_string()));
-                    }
-                }
+        let Ok(entry) = entry else { continue; };
+        let Ok(file_type) = entry.file_type() else { continue; };
+        if file_type.is_file() {
+            let Ok(file_name) = entry.file_name().into_string() else { continue; };
+            // Check if the file name matches any of the regular expressions.
+            if regx.iter().any(|&regx| file_name.contains(regx)) {
+                let path = entry.path();
+                let Some(path) = path.to_str() else { continue; };
+                return Ok(Some(path.to_string()));
             }
         }
     }
@@ -79,7 +77,7 @@ mod tests {
                 track: cmus::Track::from_str(include_str!(
                     "../tests/samples/cmus-remote-output-with-all-tags.txt"
                 ))
-                .unwrap(),
+                    .unwrap(),
             }
         }
     }

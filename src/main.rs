@@ -2,6 +2,7 @@
 
 mod arguments;
 mod cmus;
+mod utils;
 
 use clap::Parser;
 

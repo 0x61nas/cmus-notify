@@ -7,16 +7,17 @@ use std::path::Path;
 pub fn search_for(
     search_directory: &str,
     max_depth: u8,
-    regx: &[&str],
-) -> std::io::Result<Option<String>> {
+    regx: &str,
+) -> Result<Option<String>, String> {
     // Search in the track directory.
-    for entry in std::fs::read_dir(search_directory)? {
+    for entry in std::fs::read_dir(search_directory).map_err(|e| e.to_string())? {
         let Ok(entry) = entry else { continue; };
         let Ok(file_type) = entry.file_type() else { continue; };
         if file_type.is_file() {
             let Ok(file_name) = entry.file_name().into_string() else { continue; };
-            // Check if the file name matches any of the regular expressions.
-            if regx.iter().any(|&regx| file_name.contains(regx)) {
+            // Check if the file name matches the regular expression.
+            let matcher = regex::Regex::new(regx).map_err(|e| e.to_string())?;
+            if matcher.is_match(&file_name) {
                 let path = entry.path();
                 let Some(path) = path.to_str() else { continue; };
                 return Ok(Some(path.to_string()));
@@ -64,6 +65,7 @@ pub fn process_template_placeholders(template: &String, track: &cmus::Track) -> 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::assert_matches::assert_matches;
     use std::str::FromStr;
     use test_context::{test_context, TestContext};
 
@@ -77,7 +79,7 @@ mod tests {
                 track: cmus::Track::from_str(include_str!(
                     "../tests/samples/cmus-remote-output-with-all-tags.txt"
                 ))
-                    .unwrap(),
+                .unwrap(),
             }
         }
     }
@@ -91,6 +93,32 @@ mod tests {
         assert_eq!(
             cover_path,
             "Photograph/Alex Goot/Alex Goot & Friends, Vol. 3/8"
+        );
+    }
+
+    #[test]
+    fn test_search_for_cover_with_the_cover_key_world() {
+        let cover_path = search_for(
+            "tests/samples/Owl City/Cinematic",
+            1,
+            r"cover|.\.jpg|.\.png",
+        );
+
+        assert_matches!(cover_path, Ok(Some(_)));
+        assert_eq!(
+            cover_path.unwrap().unwrap(),
+            "tests/samples/Owl City/Cinematic/cover.jpg"
+        );
+    }
+
+    #[test]
+    fn test_search_for_cover_without_the_cover_key_world() {
+        let cover_path = search_for("tests/samples/Owl City/Cinematic", 1, r".\.jpg|.\.png");
+
+        assert_matches!(cover_path, Ok(Some(_)));
+        assert_eq!(
+            cover_path.unwrap().unwrap(),
+            "tests/samples/Owl City/Cinematic/cover.jpg"
         );
     }
 }

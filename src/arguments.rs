@@ -6,7 +6,7 @@ const NOTIFICATION_BODY: &str =
 const NOTIFICATION_SUMMARY: &str = "{artist} - {title}";
 const NOTIFICATION_APP_NAME: &str = "C* Music Player";
 const DEFAULT_MAX_DEPTH: u8 = 3;
-const DEFAULT_INTERVAL_TIME: u32 = 1000; // 1000 ms
+const DEFAULT_INTERVAL_TIME: u64 = 1000; // 1000 ms
 
 #[derive(Parser, Debug)]
 #[command(author, about, version, long_about = None)]
@@ -50,7 +50,7 @@ pub struct Arguments {
     /// e.g. "lyrics/{artist}/{album}/{title}.lrc", "lyrics/{artist}/{album}/*",
     ///
     /// If you not specify the full path, the lyrics will be started from the track's directory.
-    #[arg(short, long, default_value = None)]
+    #[arg(short = 'y', long, default_value = None)]
     pub lyrics_path: Option<String>,
     /// The maximum path depth to search for the cover and lyrics files,
     /// if the files are not found in the track's directory, or the directory specified by the `--cover-path`
@@ -128,5 +128,8 @@ pub struct Arguments {
     ///
     /// but I recommend 1s, it's not too fast, and not too slow, and it will not waste your CPU and battery.
     #[arg(short = 'r', long, default_value_t = DEFAULT_INTERVAL_TIME)]
-    pub interval: u32,
+    pub interval: u64,
+    /// Link the program with cmus, if the cmus are not running, the program will exit.
+    #[arg(short = 'l', long)]
+    pub link: bool,
 }

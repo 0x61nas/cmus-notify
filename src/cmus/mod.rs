@@ -4,19 +4,20 @@ use std::num::ParseIntError;
 use std::str::FromStr;
 use typed_builder::TypedBuilder;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Default)]
 pub struct TrackMetadata {
     tags: HashMap<String, String>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Default)]
 pub enum TrackStatus {
     Playing,
     Paused,
+    #[default]
     Stopped,
 }
 
-#[derive(Debug, TypedBuilder, PartialEq)]
+#[derive(Debug, TypedBuilder, PartialEq, Default)]
 pub struct Track {
     pub status: TrackStatus,
     pub path: String,
@@ -118,7 +119,7 @@ impl TrackMetadata {
         TrackMetadata { tags }
     }
 
-    fn get(&self, key: &str) -> Option<&str> {
+    pub fn get(&self, key: &str) -> Option<&str> {
         self.tags.get(key).map(|s| s.as_str())
     }
 }
@@ -127,9 +128,9 @@ impl Track {
     /// Returns the name of the track.
     ///
     /// This is the title, if it exists, otherwise it's the file name without the extension.
-    pub fn get_name(&self) -> String {
+    pub fn get_name(&self) -> &str {
         self.metadata.get("title").unwrap_or_else(|| self.path.split('/').last()
-            .unwrap_or("").split_once(".").unwrap_or(("", "")).0).to_string()
+            .unwrap_or("").split_once(".").unwrap_or(("", "")).0)
     }
 }
 

@@ -99,7 +99,7 @@ mod tests {
     #[test]
     fn test_search_for_cover_with_the_cover_key_world() {
         let cover_path = search_for(
-            "tests/samples/Owl City/Cinematic",
+            "tests/samples/Owl City/Cinematic/cover",
             1,
             r"cover|.\.jpg|.\.png",
         );
@@ -107,18 +107,43 @@ mod tests {
         assert_matches!(cover_path, Ok(Some(_)));
         assert_eq!(
             cover_path.unwrap().unwrap(),
-            "tests/samples/Owl City/Cinematic/cover.jpg"
+            "tests/samples/Owl City/Cinematic/cover/cover.jpg"
         );
     }
 
     #[test]
     fn test_search_for_cover_without_the_cover_key_world() {
-        let cover_path = search_for("tests/samples/Owl City/Cinematic", 1, r".\.jpg|.\.png");
+        let cover_path = search_for(
+            "tests/samples/Owl City/Cinematic/cover", 1, r".\.jpg|.\.png");
 
         assert_matches!(cover_path, Ok(Some(_)));
         assert_eq!(
             cover_path.unwrap().unwrap(),
-            "tests/samples/Owl City/Cinematic/cover.jpg"
+            "tests/samples/Owl City/Cinematic/cover/cover.jpg"
+        );
+    }
+
+    #[test]
+    fn test_search_for_cover_without_the_cover_key_world_and_jpg() {
+        let cover_path = search_for(
+            "tests/samples/Owl City/Cinematic/cover", 1, r".\.png");
+
+        assert_matches!(cover_path, Ok(Some(_)));
+        assert_eq!(
+            cover_path.unwrap().unwrap(),
+            "tests/samples/Owl City/Cinematic/cover/cover.png"
+        );
+    }
+
+    #[test]
+    fn test_search_for_lrc_file_started_from_the_cover_directory() {
+        let lrc_path = search_for(
+            "tests/samples/Owl City/Cinematic/cover", 1, r".\.lrc");
+
+        assert_matches!(lrc_path, Ok(Some(_)));
+        assert_eq!(
+            lrc_path.unwrap().unwrap(),
+            "tests/samples/Owl City/Cinematic/08 - Always.lrc"
         );
     }
 }

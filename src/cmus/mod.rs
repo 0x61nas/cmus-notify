@@ -34,7 +34,7 @@ pub enum CmusError {
     EmptyPath,
     DurationError(String),
     PositionError(String),
-    UnknownError(String)
+    UnknownError(String),
 }
 
 impl Display for CmusError {
@@ -75,21 +75,43 @@ impl FromStr for Track {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut lines = s.lines();
 
-        Ok(Track::builder().status(
-            TrackStatus::from_str(lines.next().ok_or(CmusError::NoStatus)?.split_once(' ')
-                .ok_or(CmusError::NoStatus)?.1)?
-        )
-            .path(lines.next().ok_or(CmusError::EmptyPath)?.split_once(' ')
-                .ok_or(CmusError::EmptyPath)?.1.to_string())
+        Ok(Track::builder()
+            .status(TrackStatus::from_str(
+                lines
+                    .next()
+                    .ok_or(CmusError::NoStatus)?
+                    .split_once(' ')
+                    .ok_or(CmusError::NoStatus)?
+                    .1,
+            )?)
+            .path(
+                lines
+                    .next()
+                    .ok_or(CmusError::EmptyPath)?
+                    .split_once(' ')
+                    .ok_or(CmusError::EmptyPath)?
+                    .1
+                    .to_string(),
+            )
             .duration(
-                lines.next().ok_or(CmusError::DurationError("Missing duration".to_string()))?.split_once(' ')
-                    .ok_or(CmusError::DurationError("Empty duration".to_string()))?.1.parse()
-                    .map_err(|e: ParseIntError| CmusError::DurationError(e.to_string()))?
+                lines
+                    .next()
+                    .ok_or(CmusError::DurationError("Missing duration".to_string()))?
+                    .split_once(' ')
+                    .ok_or(CmusError::DurationError("Empty duration".to_string()))?
+                    .1
+                    .parse()
+                    .map_err(|e: ParseIntError| CmusError::DurationError(e.to_string()))?,
             )
             .position(
-                lines.next().ok_or(CmusError::PositionError("Missing position".to_string()))?.split_once(' ')
-                    .ok_or(CmusError::PositionError("Empty position".to_string()))?.1.parse()
-                    .map_err(|e: ParseIntError| CmusError::PositionError(e.to_string()))?
+                lines
+                    .next()
+                    .ok_or(CmusError::PositionError("Missing position".to_string()))?
+                    .split_once(' ')
+                    .ok_or(CmusError::PositionError("Empty position".to_string()))?
+                    .1
+                    .parse()
+                    .map_err(|e: ParseIntError| CmusError::PositionError(e.to_string()))?,
             )
             .metadata(TrackMetadata::parse(lines))
             .build())
@@ -101,7 +123,7 @@ impl TrackMetadata {
     /// This function will assume you processed the first 4 lines, and remove them from the iterator.
     ///
     /// and also assume the all tags is contained in the iterator.
-    fn parse<'a>(mut lines: impl Iterator<Item=&'a str>) -> Self {
+    fn parse<'a>(mut lines: impl Iterator<Item = &'a str>) -> Self {
         let mut tags = HashMap::new();
 
         while let Some(line) = lines.next() {
@@ -129,8 +151,15 @@ impl Track {
     ///
     /// This is the title, if it exists, otherwise it's the file name without the extension.
     pub fn get_name(&self) -> &str {
-        self.metadata.get("title").unwrap_or_else(|| self.path.split('/').last()
-            .unwrap_or("").split_once(".").unwrap_or(("", "")).0)
+        self.metadata.get("title").unwrap_or_else(|| {
+            self.path
+                .split('/')
+                .last()
+                .unwrap_or("")
+                .split_once(".")
+                .unwrap_or(("", ""))
+                .0
+        })
     }
 }
 
@@ -140,14 +169,18 @@ impl Track {
 #[inline]
 pub fn get_track(query_command: &mut std::process::Command) -> Result<Track, CmusError> {
     // Just run the command, and collect the output.
-    let output = query_command.output().map_err(|e| CmusError::CmusRunningError(e.to_string()))?;
+    let output = query_command
+        .output()
+        .map_err(|e| CmusError::CmusRunningError(e.to_string()))?;
 
     if !output.status.success() {
-        return Err(CmusError::CmusRunningError(String::from_utf8(output.stderr)
-            .map_err(|e| CmusError::UnknownError(e.to_string()))?));
+        return Err(CmusError::CmusRunningError(
+            String::from_utf8(output.stderr).map_err(|e| CmusError::UnknownError(e.to_string()))?,
+        ));
     }
 
-    let output = String::from_utf8(output.stdout).map_err(|e| CmusError::UnknownError(e.to_string()))?;
+    let output =
+        String::from_utf8(output.stdout).map_err(|e| CmusError::UnknownError(e.to_string()))?;
 
     Track::from_str(&output).map_err(|e| CmusError::UnknownError(e.to_string()))
 }
@@ -156,7 +189,11 @@ pub fn get_track(query_command: &mut std::process::Command) -> Result<Track, Cmu
 /// This function it should call only one time entire the program life time, So it makes sense to make it inline.
 /// This function will return a `std::process::Command` that can be used to query cmus, you should store it in a variable :).
 #[inline(always)]
-pub fn build_query_command(cmus_remote_bin: &str, socket_addr: &Option<String>, socket_pass: &Option<String>) -> std::process::Command {
+pub fn build_query_command(
+    cmus_remote_bin: &str,
+    socket_addr: &Option<String>,
+    socket_pass: &Option<String>,
+) -> std::process::Command {
     let cmd_arr = cmus_remote_bin.split_whitespace().collect::<Vec<_>>();
     let mut command = std::process::Command::new(cmd_arr[0]);
 
@@ -178,13 +215,13 @@ pub fn build_query_command(cmus_remote_bin: &str, socket_addr: &Option<String>, 
     command
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::assert_matches::assert_matches;
 
-    const OUTPUT_WITH_ALL_TAGS: &str = include_str!("../../tests/samples/cmus-remote-output-with-all-tags.txt");
+    const OUTPUT_WITH_ALL_TAGS: &str =
+        include_str!("../../tests/samples/cmus-remote-output-with-all-tags.txt");
 
     const SOME_TAGS: &str = r#"tag artist Alex Goot
         tag album Alex Goot & Friends, Vol. 3
@@ -214,18 +251,48 @@ mod tests {
         assert_eq!(track.path, "/mnt/Data/Music/FLAC/Alex Goot/Alex Goot - Alex Goot & Friends, Vol. 3/08 - Photograph.mp3");
         assert_eq!(track.duration, 284);
         assert_eq!(track.position, 226);
-        assert_eq!(track.metadata.tags.get("artist"), Some(&"Alex Goot".to_string()));
-        assert_eq!(track.metadata.tags.get("album"), Some(&"Alex Goot & Friends, Vol. 3".to_string()));
-        assert_eq!(track.metadata.tags.get("title"), Some(&"Photograph".to_string()));
+        assert_eq!(
+            track.metadata.tags.get("artist"),
+            Some(&"Alex Goot".to_string())
+        );
+        assert_eq!(
+            track.metadata.tags.get("album"),
+            Some(&"Alex Goot & Friends, Vol. 3".to_string())
+        );
+        assert_eq!(
+            track.metadata.tags.get("title"),
+            Some(&"Photograph".to_string())
+        );
         assert_eq!(track.metadata.tags.get("date"), Some(&"2014".to_string()));
         assert_eq!(track.metadata.tags.get("genre"), Some(&"Pop".to_string()));
-        assert_eq!(track.metadata.tags.get("discnumber"), Some(&"1".to_string()));
-        assert_eq!(track.metadata.tags.get("tracknumber"), Some(&"8".to_string()));
-        assert_eq!(track.metadata.tags.get("albumartist"), Some(&"Alex Goot".to_string()));
-        assert_eq!(track.metadata.tags.get("replaygain_track_gain"), Some(&"-9.4 dB".to_string()));
-        assert_eq!(track.metadata.tags.get("composer"), Some(&"Chad Kroeger".to_string()));
-        assert_eq!(track.metadata.tags.get("label"), Some(&"mudhutdigital.com".to_string()));
-        assert_eq!(track.metadata.tags.get("publisher"), Some(&"mudhutdigital.com".to_string()));
+        assert_eq!(
+            track.metadata.tags.get("discnumber"),
+            Some(&"1".to_string())
+        );
+        assert_eq!(
+            track.metadata.tags.get("tracknumber"),
+            Some(&"8".to_string())
+        );
+        assert_eq!(
+            track.metadata.tags.get("albumartist"),
+            Some(&"Alex Goot".to_string())
+        );
+        assert_eq!(
+            track.metadata.tags.get("replaygain_track_gain"),
+            Some(&"-9.4 dB".to_string())
+        );
+        assert_eq!(
+            track.metadata.tags.get("composer"),
+            Some(&"Chad Kroeger".to_string())
+        );
+        assert_eq!(
+            track.metadata.tags.get("label"),
+            Some(&"mudhutdigital.com".to_string())
+        );
+        assert_eq!(
+            track.metadata.tags.get("publisher"),
+            Some(&"mudhutdigital.com".to_string())
+        );
         assert_eq!(track.metadata.tags.get("bpm"), Some(&"146".to_string()));
     }
 
@@ -234,17 +301,35 @@ mod tests {
         let metadata = TrackMetadata::parse(SOME_TAGS.lines());
 
         assert_eq!(metadata.tags.get("artist"), Some(&"Alex Goot".to_string()));
-        assert_eq!(metadata.tags.get("album"), Some(&"Alex Goot & Friends, Vol. 3".to_string()));
+        assert_eq!(
+            metadata.tags.get("album"),
+            Some(&"Alex Goot & Friends, Vol. 3".to_string())
+        );
         assert_eq!(metadata.tags.get("title"), Some(&"Photograph".to_string()));
         assert_eq!(metadata.tags.get("date"), Some(&"2014".to_string()));
         assert_eq!(metadata.tags.get("genre"), Some(&"Pop".to_string()));
         assert_eq!(metadata.tags.get("discnumber"), Some(&"1".to_string()));
         assert_eq!(metadata.tags.get("tracknumber"), Some(&"8".to_string()));
-        assert_eq!(metadata.tags.get("albumartist"), Some(&"Alex Goot".to_string()));
-        assert_eq!(metadata.tags.get("replaygain_track_gain"), Some(&"-9.4 dB".to_string()));
-        assert_eq!(metadata.tags.get("composer"), Some(&"Chad Kroeger".to_string()));
-        assert_eq!(metadata.tags.get("label"), Some(&"mudhutdigital.com".to_string()));
-        assert_eq!(metadata.tags.get("publisher"), Some(&"mudhutdigital.com".to_string()));
+        assert_eq!(
+            metadata.tags.get("albumartist"),
+            Some(&"Alex Goot".to_string())
+        );
+        assert_eq!(
+            metadata.tags.get("replaygain_track_gain"),
+            Some(&"-9.4 dB".to_string())
+        );
+        assert_eq!(
+            metadata.tags.get("composer"),
+            Some(&"Chad Kroeger".to_string())
+        );
+        assert_eq!(
+            metadata.tags.get("label"),
+            Some(&"mudhutdigital.com".to_string())
+        );
+        assert_eq!(
+            metadata.tags.get("publisher"),
+            Some(&"mudhutdigital.com".to_string())
+        );
         assert_eq!(metadata.tags.get("bpm"), Some(&"146".to_string()));
     }
 
@@ -258,18 +343,29 @@ mod tests {
 
     #[test]
     fn test_build_the_query_command_with_custom_socket_and_no_pass() {
-        let command = build_query_command("cmus-remote", &Some("/tmp/cmus-socket".to_string()), &None);
+        let command =
+            build_query_command("cmus-remote", &Some("/tmp/cmus-socket".to_string()), &None);
 
         assert_eq!(command.get_program(), "cmus-remote");
-        assert_eq!(command.get_args().collect::<Vec<_>>(), &["--server", "/tmp/cmus-socket", "-Q"]);
+        assert_eq!(
+            command.get_args().collect::<Vec<_>>(),
+            &["--server", "/tmp/cmus-socket", "-Q"]
+        );
     }
 
     #[test]
     fn test_build_the_query_command_with_custom_socket_and_pass() {
-        let command = build_query_command("cmus-remote", &Some("/tmp/cmus-socket".to_string()), &Some("pass".to_string()));
+        let command = build_query_command(
+            "cmus-remote",
+            &Some("/tmp/cmus-socket".to_string()),
+            &Some("pass".to_string()),
+        );
 
         assert_eq!(command.get_program(), "cmus-remote");
-        assert_eq!(command.get_args().collect::<Vec<_>>(), &["--server", "/tmp/cmus-socket", "--passwd", "pass", "-Q"]);
+        assert_eq!(
+            command.get_args().collect::<Vec<_>>(),
+            &["--server", "/tmp/cmus-socket", "--passwd", "pass", "-Q"]
+        );
     }
 
     #[test]
@@ -277,6 +373,9 @@ mod tests {
         let command = build_query_command("flatpak run io.github.cmus.cmus", &None, &None);
 
         assert_eq!(command.get_program(), "flatpak");
-        assert_eq!(command.get_args().collect::<Vec<_>>(), &["run", "io.github.cmus.cmus", "-Q"]);
+        assert_eq!(
+            command.get_args().collect::<Vec<_>>(),
+            &["run", "io.github.cmus.cmus", "-Q"]
+        );
     }
 }

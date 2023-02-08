@@ -1,10 +1,14 @@
-use std::path::Path;
 use crate::cmus;
+use std::path::Path;
 
 /// Search in the track directory for the cover image or the lyrics(depending on the `regx`).
 /// If the cover image or the lyrics is not found, search in the parent directory, and so on, until the max depth is reached.
 /// If the cover image or the lyrics is not found, return `None`.
-pub fn search_for(search_directory: &str, max_depth: u8, regx: &[&str]) -> std::io::Result<Option<String>> {
+pub fn search_for(
+    search_directory: &str,
+    max_depth: u8,
+    regx: &[&str],
+) -> std::io::Result<Option<String>> {
     // Search in the track directory.
     for entry in std::fs::read_dir(search_directory)? {
         if let Ok(entry) = entry {
@@ -24,7 +28,8 @@ pub fn search_for(search_directory: &str, max_depth: u8, regx: &[&str]) -> std::
     // If the max depth is reached, return `None`.
     if max_depth == 0 {
         Ok(None)
-    } else { // If the max depth is not reached, search in the parent directory (recursively).
+    } else {
+        // If the max depth is not reached, search in the parent directory (recursively).
         let Some(parent) = Path::new(search_directory).parent() else { return Ok(None); };
         let Some(parent) = parent.to_str() else { return Ok(None); };
         search_for(parent, max_depth - 1, regx)
@@ -41,11 +46,15 @@ pub fn process_template_placeholders(template: &String, track: &cmus::Track) -> 
     for c in template.chars() {
         if c == '{' {
             key = String::new();
-        } else if c == '}' { // Replace the key with their matching value if exists, if not replace with the empty string.
-            processed = processed.replace(&format!("{{{}}}", key), match key.as_str() {
-                "title" => track.get_name(),
-                _ => track.metadata.get(&key).unwrap_or(""),
-            });
+        } else if c == '}' {
+            // Replace the key with their matching value if exists, if not replace with the empty string.
+            processed = processed.replace(
+                &format!("{{{}}}", key),
+                match key.as_str() {
+                    "title" => track.get_name(),
+                    _ => track.metadata.get(&key).unwrap_or(""),
+                },
+            );
         } else {
             key.push(c);
         }
@@ -67,7 +76,10 @@ mod tests {
     impl TestContext for TestContextWithFullTrack {
         fn setup() -> Self {
             Self {
-                track: cmus::Track::from_str(include_str!("../tests/samples/cmus-remote-output-with-all-tags.txt")).unwrap()
+                track: cmus::Track::from_str(include_str!(
+                    "../tests/samples/cmus-remote-output-with-all-tags.txt"
+                ))
+                .unwrap(),
             }
         }
     }
@@ -78,6 +90,9 @@ mod tests {
         let cover_path_template = String::from("{title}/{artist}/{album}/{tracknumber}");
         let cover_path = process_template_placeholders(&cover_path_template, &ctx.track);
 
-        assert_eq!(cover_path, "Photograph/Alex Goot/Alex Goot & Friends, Vol. 3/8");
+        assert_eq!(
+            cover_path,
+            "Photograph/Alex Goot/Alex Goot & Friends, Vol. 3/8"
+        );
     }
 }

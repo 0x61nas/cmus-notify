@@ -1,7 +1,8 @@
 use clap::Parser;
 
 const NOTIFICATION_TIMEOUT: u8 = 5;
-const NOTIFICATION_BODY: &str = "<b>Playing:</b> {title} from {album} \n\n <b>Artist:</b> {artist} - {year}";
+const NOTIFICATION_BODY: &str =
+    "<b>Playing:</b> {title} from {album} \n\n <b>Artist:</b> {artist} - {year}";
 const NOTIFICATION_SUMMARY: &str = "{artist} - {title}";
 const NOTIFICATION_APP_NAME: &str = "C* Music Player";
 const DEFAULT_MAX_DEPTH: u8 = 3;

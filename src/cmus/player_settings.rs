@@ -5,9 +5,17 @@ use crate::cmus::CmusError;
 #[derive(Debug, PartialEq)]
 pub struct PlayerSettings {
     pub repeat: bool,
-    pub shuffle: bool,
+    pub shuffle: Shuffle,
     pub aa_mode: AAAMode,
     pub volume: Volume,
+}
+
+#[derive(Debug, PartialEq, Default)]
+pub enum Shuffle {
+    #[default]
+    Off,
+    Tracks,
+    Albums,
 }
 
 #[derive(Debug, PartialEq, Default)]
@@ -18,11 +26,10 @@ pub struct Volume {
 
 #[derive(Debug, PartialEq, Default)]
 pub enum AAAMode {
+    #[default]
     All,
     Album,
     Artist,
-    #[default]
-    None,
 }
 
 impl FromStr for AAAMode {
@@ -33,8 +40,20 @@ impl FromStr for AAAMode {
             "all" => Ok(Self::All),
             "album" => Ok(Self::Album),
             "artist" => Ok(Self::Artist),
-            "none" => Ok(Self::None),
             _ => Err(CmusError::UnknownAAAMode(s.to_string()))
+        }
+    }
+}
+
+impl FromStr for Shuffle {
+    type Err = CmusError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "off" => Ok(Self::Off),
+            "tracks" => Ok(Self::Tracks),
+            "albums" => Ok(Self::Albums),
+            _ => Err(CmusError::UnknownShuffleMode(s.to_string()))
         }
     }
 }
@@ -44,18 +63,18 @@ impl FromStr for PlayerSettings {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut repeat = false;
-        let mut shuffle = false;
+        let mut shuffle = Shuffle::default();
         let mut aa_mode = AAAMode::default();
         let mut volume = Volume::default();
 
         for line in s.lines() {
             if line.starts_with("set ") {
                 let line = &line[4..];
-                let (key, value) = line.split_once(" ").ok_or("Corrupted cmus response")?;
+                let (key, value) = line.split_once(" ").ok_or(CmusError::UnknownError("Corrupted cmus response".to_string()))?;
 
                 match key {
                     "repeat" => repeat = value == "true",
-                    "shuffle" => shuffle = value == "true",
+                    "shuffle" => shuffle = Shuffle::from_str(value)?,
                     "aa_mode" => aa_mode = AAAMode::from_str(value)?,
                     "vol_left" => volume.left = value.parse().map_err(|e: ParseIntError| CmusError::UnknownError(e.to_string()))?,
                     "vol_right" => volume.right = value.parse().map_err(|e: ParseIntError| CmusError::UnknownError(e.to_string()))?,
@@ -70,5 +89,28 @@ impl FromStr for PlayerSettings {
             aa_mode,
             volume,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_aaamode_from_str() {
+        let all = AAAMode::from_str("all");
+        let album = AAAMode::from_str("album");
+        let artist = AAAMode::from_str("artist");
+        let unknown = AAAMode::from_str("unknown");
+
+        assert_eq!(all, Ok(AAAMode::All));
+        assert_eq!(album, Ok(AAAMode::Album));
+        assert_eq!(artist, Ok(AAAMode::Artist));
+        assert_eq!(unknown, Err(CmusError::UnknownAAAMode("unknown".to_string())));
+    }
+
+    #[test]
+    fn test_parse_player_settings_from_str() {
+
     }
 }

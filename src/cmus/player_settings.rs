@@ -6,7 +6,7 @@ use crate::cmus::CmusError;
 pub struct PlayerSettings {
     pub repeat: bool,
     pub shuffle: Shuffle,
-    pub aa_mode: AAAMode,
+    pub aaa_mode: AAAMode,
     pub volume: Volume,
 }
 
@@ -86,7 +86,7 @@ impl FromStr for PlayerSettings {
         Ok(Self {
             repeat,
             shuffle,
-            aa_mode,
+            aaa_mode: aa_mode,
             volume,
         })
     }
@@ -132,7 +132,7 @@ mod tests {
         assert_eq!(settings, Ok(PlayerSettings {
             repeat: false,
             shuffle: Shuffle::Tracks,
-            aa_mode: AAAMode::Artist,
+            aaa_mode: AAAMode::Artist,
             volume: Volume {
                 left: 46,
                 right: 46,

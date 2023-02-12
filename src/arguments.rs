@@ -177,3 +177,74 @@ impl Default for Arguments {
         }
     }
 }
+
+impl Arguments {
+    pub fn load_config_and_parse_args() -> Self {
+        // load config file
+        let cfg: Self = match confy::load("cmus-notify", "config") {
+            Ok(cfg) => cfg,
+            Err(err) => {
+                eprintln!("Failed to load config: {}", err);
+                Self::default()
+            }
+        };
+
+        // parse the args
+        let mut args = Arguments::parse();
+
+        // Combine the config and args(the args will override the config)
+        if args.timeout == NOTIFICATION_TIMEOUT {
+            args.timeout = cfg.timeout;
+        }
+        if args.persistent == false {
+            args.persistent = cfg.persistent;
+        }
+        if args.show_track_cover == true {
+            args.show_track_cover = cfg.show_track_cover;
+        }
+        args.notification_static_icon = args.notification_static_icon.or(cfg.notification_static_icon);
+        args.cover_path = args.cover_path.or(cfg.cover_path);
+        #[cfg(feature = "lyrics")]
+        if args.lyrics_path == None {
+            args.lyrics_path = cfg.lyrics_path;
+        }
+
+        if args.depth == DEFAULT_MAX_DEPTH {
+            args.depth = cfg.depth;
+        }
+        if args.app_name == NOTIFICATION_APP_NAME {
+            args.app_name = cfg.app_name;
+        }
+        if args.summary == NOTIFICATION_SUMMARY {
+            args.summary = cfg.summary;
+        }
+        if args.body == NOTIFICATION_BODY {
+            args.body = cfg.body;
+        }
+        args.cmus_remote_bin_path = args.cmus_remote_bin_path.or(cfg.cmus_remote_bin_path);
+        args.cmus_socket_address = args.cmus_socket_address.or(cfg.cmus_socket_address);
+        args.cmus_socket_password = args.cmus_socket_password.or(cfg.cmus_socket_password);
+        if args.interval == DEFAULT_INTERVAL_TIME {
+            args.interval = cfg.interval;
+        }
+        if args.link == false {
+            args.link = cfg.link;
+        }
+        if args.force_use_external_cover == false {
+            args.force_use_external_cover = cfg.force_use_external_cover;
+        }
+        #[cfg(feature = "lyrics")]
+        if args.force_use_external_lyrics == false {
+            args.force_use_external_lyrics = cfg.force_use_external_lyrics;
+        }
+        if args.no_use_external_cover == false {
+            args.no_use_external_cover = cfg.no_use_external_cover;
+        }
+        #[cfg(feature = "lyrics")]
+        if args.no_use_external_lyrics == false {
+            args.no_use_external_lyrics = cfg.no_use_external_lyrics;
+        }
+
+        args
+    }
+}

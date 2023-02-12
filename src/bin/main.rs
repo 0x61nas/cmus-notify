@@ -4,6 +4,7 @@ use cmus_notify::{
     arguments,
     cmus::{self, query::CmusQueryResponse, CmusError},
 };
+use cmus_notify::arguments::Arguments;
 
 macro_rules! sleep {
     ($time: expr) => {
@@ -12,7 +13,8 @@ macro_rules! sleep {
 }
 
 fn main() {
-    let args = arguments::Arguments::parse();
+    // Load the configs
+    let settings = Arguments::load_config_and_parse_args();
 
     // Build the command, or use the default. (to speed up the main loop, because we don't need to build it every time)
     let mut query_command = cmus::build_query_command(

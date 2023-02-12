@@ -1,10 +1,10 @@
 use clap::Parser;
 
+use cmus_notify::arguments::Arguments;
 use cmus_notify::{
     arguments,
     cmus::{self, query::CmusQueryResponse, CmusError},
 };
-use cmus_notify::arguments::Arguments;
 
 macro_rules! sleep {
     ($time: expr) => {

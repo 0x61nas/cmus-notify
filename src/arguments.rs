@@ -202,7 +202,9 @@ impl Arguments {
         if args.show_track_cover == true {
             args.show_track_cover = cfg.show_track_cover;
         }
-        args.notification_static_icon = args.notification_static_icon.or(cfg.notification_static_icon);
+        args.notification_static_icon = args
+            .notification_static_icon
+            .or(cfg.notification_static_icon);
         args.cover_path = args.cover_path.or(cfg.cover_path);
         #[cfg(feature = "lyrics")]
         if args.lyrics_path == None {

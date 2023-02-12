@@ -64,7 +64,7 @@ impl FromStr for PlayerSettings {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut repeat = false;
         let mut shuffle = Shuffle::default();
-        let mut aa_mode = AAAMode::default();
+        let mut aaa_mode = AAAMode::default();
         let mut volume = Volume::default();
 
         for line in s.lines() {
@@ -75,7 +75,7 @@ impl FromStr for PlayerSettings {
                 match key {
                     "repeat" => repeat = value == "true",
                     "shuffle" => shuffle = Shuffle::from_str(value)?,
-                    "aaa_mode" => aa_mode = AAAMode::from_str(value)?,
+                    "aaa_mode" => aaa_mode = AAAMode::from_str(value)?,
                     "vol_left" => volume.left = value.parse().map_err(|e: ParseIntError| CmusError::UnknownError(e.to_string()))?,
                     "vol_right" => volume.right = value.parse().map_err(|e: ParseIntError| CmusError::UnknownError(e.to_string()))?,
                     _ => {}
@@ -86,7 +86,7 @@ impl FromStr for PlayerSettings {
         Ok(Self {
             repeat,
             shuffle,
-            aaa_mode: aa_mode,
+            aaa_mode,
             volume,
         })
     }

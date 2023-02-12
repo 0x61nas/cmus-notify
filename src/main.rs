@@ -4,7 +4,14 @@ mod arguments;
 mod cmus;
 mod utils;
 
+use crate::cmus::query::CmusQueryResponse;
 use clap::Parser;
+
+macro_rules! sleep {
+    ($time: expr) => {
+        std::thread::sleep(std::time::Duration::from_millis($time));
+    };
+}
 
 fn main() {
     let args = arguments::Arguments::parse();
@@ -19,12 +26,8 @@ fn main() {
         &args.cmus_socket_password,
     );
 
-    let sleep = || {
-        std::thread::sleep(std::time::Duration::from_millis(args.interval));
-    };
-
-    // Initialize the buffer to store the track info, to compare it with the next one.
-    let mut previous_track = cmus::Track::default();
+    // Initialize the buffer to store the response from cmus, to compare it with the next one.
+    let mut previous_response = CmusQueryResponse::default();
     // Initialize the buffer to store the cover path, to compare it with the next one.
     // This is used to speed up the main loop, because we don't need to process the template and search for the cover every time.
     // We only need to do it when the track directory changes.
@@ -32,12 +35,12 @@ fn main() {
 
     loop {
         // Get the track info, and compare it with the previous one.
-        let Ok(track) = cmus::ping_cmus(&mut query_command) else {
+        let Ok(response) = cmus::ping_cmus(&mut query_command) else {
             if args.link {
                 std::process::exit(0)
             } else {
                 // If the track info is the same as the previous one, just sleep for a while and try again.
-                sleep();
+                sleep!(args.interval);
                 continue;
             }
         };
@@ -52,6 +55,6 @@ fn main() {
                 let changes = track.get_changes(&previous_track);
         */
 
-        sleep();
+        sleep!(args.interval);
     }
 }

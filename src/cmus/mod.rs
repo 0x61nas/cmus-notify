@@ -1,6 +1,6 @@
-mod events;
-mod player_settings;
-mod query;
+pub mod events;
+pub mod player_settings;
+pub mod query;
 
 use crate::cmus::query::CmusQueryResponse;
 use std::collections::HashMap;

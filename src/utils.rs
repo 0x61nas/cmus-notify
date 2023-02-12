@@ -1,6 +1,42 @@
 use crate::cmus;
 use std::path::Path;
 
+
+/// Extracts the first embedded picture from an ID3 tag of an Audio file.
+///
+/// # Arguments
+///
+/// * `track_path` - The path to the Audio file.
+///
+/// # Returns
+///
+/// Returns a `Result` containing a `TempFile` object with the contents of the extracted picture, or `None` if the MP3 file doesn't have any embedded pictures.
+/// In case of error, the `Result` will contain an error value of type `std::io::Error`.
+///
+/// # Example
+///
+/// ```
+/// let result = get_embedded_art("/path/to/track.mp3");
+///
+/// match result {
+///     Ok(Some(temp_file)) => {
+///         // Use the temp file...
+///         temp_file.path();
+///     },
+///     Ok(None) => println!("Track does not have an embedded picture"),
+///     Err(error) => println!("Error: {}", error),
+/// }
+/// ```
+pub fn get_embedded_art(track_path: &str) -> std::io::Result<Option<temp_file::TempFile>> {
+    let tags = id3::Tag::read_from_path(track_path)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+    let Some(picture) = tags.pictures().next() else { return Ok(None); };
+    let temp_file = temp_file::TempFile::new()?;
+    Ok(Some(temp_file.with_contents(&*picture.data).map_err(
+        |e| std::io::Error::new(std::io::ErrorKind::Other, e),
+    )?))
+}
+
 /// Search in the track directory for the cover image or the lyrics(depending on the `regx`).
 /// If the cover image or the lyrics is not found, search in the parent directory, and so on, until the max depth is reached.
 /// If the cover image or the lyrics is not found, return `None`.

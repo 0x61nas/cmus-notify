@@ -110,6 +110,19 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_shuffle_mode_from_str() {
+        let off = Shuffle::from_str("off");
+        let tracks = Shuffle::from_str("tracks");
+        let albums = Shuffle::from_str("albums");
+        let unknown = Shuffle::from_str("unknown");
+
+        assert_eq!(off, Ok(Shuffle::Off));
+        assert_eq!(tracks, Ok(Shuffle::Tracks));
+        assert_eq!(albums, Ok(Shuffle::Albums));
+        assert_eq!(unknown, Err(CmusError::UnknownShuffleMode("unknown".to_string())));
+    }
+
+    #[test]
     fn test_parse_player_settings_from_str() {
 
     }

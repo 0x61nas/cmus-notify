@@ -5,6 +5,7 @@ use crate::cmus::CmusError;
 #[derive(Debug, PartialEq)]
 pub struct PlayerSettings {
     pub repeat: bool,
+    pub repeat_current: bool,
     pub shuffle: Shuffle,
     pub aaa_mode: AAAMode,
     pub volume: Volume,
@@ -63,6 +64,7 @@ impl FromStr for PlayerSettings {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut repeat = false;
+        let mut repeat_current = false;
         let mut shuffle = Shuffle::default();
         let mut aaa_mode = AAAMode::default();
         let mut volume = Volume::default();
@@ -74,6 +76,7 @@ impl FromStr for PlayerSettings {
 
                 match key {
                     "repeat" => repeat = value == "true",
+                    "repeat_current" => repeat_current = value == "true",
                     "shuffle" => shuffle = Shuffle::from_str(value)?,
                     "aaa_mode" => aaa_mode = AAAMode::from_str(value)?,
                     "vol_left" => volume.left = value.parse().map_err(|e: ParseIntError| CmusError::UnknownError(e.to_string()))?,
@@ -85,6 +88,7 @@ impl FromStr for PlayerSettings {
 
         Ok(Self {
             repeat,
+            repeat_current,
             shuffle,
             aaa_mode,
             volume,
@@ -131,6 +135,7 @@ mod tests {
 
         assert_eq!(settings, Ok(PlayerSettings {
             repeat: false,
+            repeat_current: false,
             shuffle: Shuffle::Tracks,
             aaa_mode: AAAMode::Artist,
             volume: Volume {

@@ -75,7 +75,7 @@ impl FromStr for PlayerSettings {
                 match key {
                     "repeat" => repeat = value == "true",
                     "shuffle" => shuffle = Shuffle::from_str(value)?,
-                    "aa_mode" => aa_mode = AAAMode::from_str(value)?,
+                    "aaa_mode" => aa_mode = AAAMode::from_str(value)?,
                     "vol_left" => volume.left = value.parse().map_err(|e: ParseIntError| CmusError::UnknownError(e.to_string()))?,
                     "vol_right" => volume.right = value.parse().map_err(|e: ParseIntError| CmusError::UnknownError(e.to_string()))?,
                     _ => {}
@@ -124,6 +124,19 @@ mod tests {
 
     #[test]
     fn test_parse_player_settings_from_str() {
+        let setting_sample = include_str!(
+            "../../tests/samples/player_settings_mode-artist_vol-46_repeat-false_repeat_current-false_shuffle-tracks.txt");
 
+        let settings = PlayerSettings::from_str(setting_sample);
+
+        assert_eq!(settings, Ok(PlayerSettings {
+            repeat: false,
+            shuffle: Shuffle::Tracks,
+            aa_mode: AAAMode::Artist,
+            volume: Volume {
+                left: 46,
+                right: 46,
+            }
+        }));
     }
 }

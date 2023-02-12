@@ -132,4 +132,19 @@ pub struct Arguments {
     /// Link the program with cmus, if the cmus are not running, the program will exit.
     #[arg(short = 'l', long)]
     pub link: bool,
+    /// Force the program to use the external cover file, if available, and not even try to get the cover from the track's metadata.
+    /// this is useful if you have a cover file with a better quality than the cover in the track's metadata.
+    #[arg(short = 'u', long)]
+    pub force_use_external_cover: bool,
+    #[cfg(feature = "lyrics")]
+    /// Fotrce the program to use the external lyrics file, if available, and not even try to get the lyrics from the track's metadata.
+    #[arg(short = 'm', long)]
+    pub force_use_external_lyrics: bool,
+    /// No use the external cover file, even if it's available and the track's metadata doesn't have a cover.
+    #[arg(short = 'n', long)]
+    pub no_use_external_cover: bool,
+    #[cfg(feature = "lyrics")]
+    /// No use the external lyrics file, even if it's available and the track's metadata doesn't have a lyrics.
+    #[arg(short = 'o', long)]
+    pub no_use_external_lyrics: bool,
 }

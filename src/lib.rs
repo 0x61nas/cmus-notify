@@ -108,7 +108,7 @@ pub enum TrackCover {
 /// If the track does not have an embedded cover, and `no_use_external_cover` is `false`, the function will search for an external cover.
 /// If the track has an embedded cover, and `force_use_external_cover` is `true`, the function will search for an external cover.
 #[inline]
-pub fn track_cover(track_path: &str, force_use_external_cover: bool, no_use_external_cover: bool) -> TrackCover {
+pub fn track_cover(track_path: &str, max_depth: u8, force_use_external_cover: bool, no_use_external_cover: bool) -> TrackCover {
     if !force_use_external_cover {
         if let Ok(Some(cover)) = get_embedded_art(track_path) {
             return TrackCover::Embedded(cover);
@@ -116,7 +116,7 @@ pub fn track_cover(track_path: &str, force_use_external_cover: bool, no_use_exte
     }
 
     if !no_use_external_cover {
-        if let Ok(Some(cover)) = search_for(track_path, 2,
+        if let Ok(Some(cover)) = search_for(track_path, max_depth,
                                             &regex::Regex::new(r".*\.(jpg|jpeg|png|gif)$").unwrap()) {
             return TrackCover::External(cover);
         }

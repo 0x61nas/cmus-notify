@@ -1,4 +1,5 @@
 use clap::Parser;
+use serde::{Deserialize, Serialize};
 
 const NOTIFICATION_TIMEOUT: u8 = 5;
 const NOTIFICATION_BODY: &str =
@@ -8,7 +9,7 @@ const NOTIFICATION_APP_NAME: &str = "C* Music Player";
 const DEFAULT_MAX_DEPTH: u8 = 3;
 const DEFAULT_INTERVAL_TIME: u64 = 1000; // 1000 ms
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Serialize, Deserialize)]
 #[command(author, about, version, long_about = None)]
 pub struct Arguments {
     /// The notification timeout, in seconds
@@ -147,4 +148,32 @@ pub struct Arguments {
     /// No use the external lyrics file, even if it's available and the track's metadata doesn't have a lyrics.
     #[arg(short = 'o', long)]
     pub no_use_external_lyrics: bool,
+}
+
+impl Default for Arguments {
+    fn default() -> Self {
+        Self {
+            timeout: NOTIFICATION_TIMEOUT,
+            persistent: false,
+            show_track_cover: true,
+            notification_static_icon: None,
+            cover_path: None,
+            lyrics_path: None,
+            depth: DEFAULT_MAX_DEPTH,
+            app_name: NOTIFICATION_APP_NAME.to_string(),
+            summary: NOTIFICATION_SUMMARY.to_string(),
+            body: NOTIFICATION_BODY.to_string(),
+            cmus_remote_bin_path: None,
+            cmus_socket_address: None,
+            cmus_socket_password: None,
+            interval: DEFAULT_INTERVAL_TIME,
+            link: false,
+            force_use_external_cover: false,
+            #[cfg(feature = "lyrics")]
+            force_use_external_lyrics: false,
+            no_use_external_cover: false,
+            #[cfg(feature = "lyrics")]
+            no_use_external_lyrics: false,
+        }
+    }
 }

@@ -211,6 +211,7 @@ dependencies = [
  "lrc",
  "notify-rust",
  "regex",
+ "serde",
  "temp-file",
  "test-context",
  "typed-builder",

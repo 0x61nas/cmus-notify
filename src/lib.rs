@@ -91,6 +91,41 @@ pub fn search_for(
     }
 }
 
+/// The cover of a track.
+pub enum TrackCover {
+    /// The cover is embedded in the track.
+    /// The `TempFile` object contains the contents of the embedded picture.
+    Embedded(temp_file::TempFile),
+    /// The cover is an external file.
+    /// The `String` contains the absolute path of the external file.
+    External(String),
+    /// The track does not have a cover.
+    None,
+}
+
+/// Returns the cover of a track.
+/// If the track has an embedded cover, and `force_use_external_cover` is `false`, the embedded cover will be returned.
+/// If the track does not have an embedded cover, and `no_use_external_cover` is `false`, the function will search for an external cover.
+/// If the track has an embedded cover, and `force_use_external_cover` is `true`, the function will search for an external cover.
+#[inline]
+pub fn track_cover(track_path: &str, force_use_external_cover: bool, no_use_external_cover: bool) -> TrackCover {
+    if !force_use_external_cover {
+        if let Ok(Some(cover)) = get_embedded_art(track_path) {
+            return TrackCover::Embedded(cover);
+        }
+    }
+
+    if !no_use_external_cover {
+        if let Ok(Some(cover)) = search_for(track_path, 2,
+                                            &regex::Regex::new(r".*\.(jpg|jpeg|png|gif)$").unwrap()) {
+            return TrackCover::External(cover);
+        }
+    }
+
+    TrackCover::None
+}
+
+
 #[inline]
 fn search(search_directory: &str, matcher: &regex::Regex) -> std::io::Result<Option<String>> {
     for entry in std::fs::read_dir(search_directory)? {

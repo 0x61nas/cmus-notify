@@ -19,7 +19,6 @@ fn main() {
         &args.cmus_socket_password,
     );
 
-
     let sleep = || {
         std::thread::sleep(std::time::Duration::from_millis(args.interval));
     };
@@ -43,18 +42,16 @@ fn main() {
             }
         };
 
-/*        // Compare the track info with the previous one, and if they are the same, just sleep for a while and try again.
-        if track == previous_track {
-            sleep();
-            continue;
-        }
+        /*        // Compare the track info with the previous one, and if they are the same, just sleep for a while and try again.
+                if track == previous_track {
+                    sleep();
+                    continue;
+                }
 
-        // If the track info is different from the previous one, get the changes events.
-        let changes = track.get_changes(&previous_track);
-*/
+                // If the track info is different from the previous one, get the changes events.
+                let changes = track.get_changes(&previous_track);
+        */
 
         sleep();
     }
-
-
 }

@@ -1,13 +1,13 @@
 mod events;
-mod query;
 mod player_settings;
+mod query;
 
+use crate::cmus::query::CmusQueryResponse;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::num::ParseIntError;
 use std::str::FromStr;
 use typed_builder::TypedBuilder;
-use crate::cmus::query::CmusQueryResponse;
 
 #[derive(Debug, PartialEq, Default)]
 pub struct TrackMetadata {
@@ -176,7 +176,9 @@ impl Track {
 /// And collect the output, and parse it into a `CmusQueryResponse`.
 /// If the cmus is not running, or the socket is not available, this function will return an error.
 #[inline]
-pub fn ping_cmus(query_command: &mut std::process::Command) -> Result<CmusQueryResponse, CmusError> {
+pub fn ping_cmus(
+    query_command: &mut std::process::Command,
+) -> Result<CmusQueryResponse, CmusError> {
     // Just run the command, and collect the output.
     let output = query_command
         .output()

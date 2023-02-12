@@ -1,6 +1,6 @@
-use std::str::FromStr;
-use crate::cmus::{CmusError, Track};
 use crate::cmus::player_settings::PlayerSettings;
+use crate::cmus::{CmusError, Track};
+use std::str::FromStr;
 
 /// This struct is used to store the row status response from cmus.
 /// So we don't parse it and take the time then we don't need it.
@@ -41,10 +41,10 @@ impl CmusQueryResponse {
 
 #[cfg(test)]
 mod tests {
-    use test_context::{test_context, TestContext};
+    use super::*;
     use crate::cmus::player_settings::{AAAMode, Shuffle};
     use crate::cmus::TrackStatus;
-    use super::*;
+    use test_context::{test_context, TestContext};
 
     #[test]
     fn test_parse_query_from_str() {
@@ -54,8 +54,14 @@ mod tests {
         assert!(query.is_ok());
         let query = query.unwrap();
 
-        assert_eq!(query.track_row, include_str!("../../tests/samples/row/cmus-remote-output-track-row.txt"));
-        assert_eq!(query.player_settings_row, include_str!("../../tests/samples/row/cmus-remote-output-player-row.txt"));
+        assert_eq!(
+            query.track_row,
+            include_str!("../../tests/samples/row/cmus-remote-output-track-row.txt")
+        );
+        assert_eq!(
+            query.player_settings_row,
+            include_str!("../../tests/samples/row/cmus-remote-output-player-row.txt")
+        );
     }
 
     struct Context {
@@ -67,9 +73,7 @@ mod tests {
             let row = include_str!("../../tests/samples/row/cmus-remote-output-row.txt");
             let query = CmusQueryResponse::from_str(row).unwrap();
 
-            Self {
-                query,
-            }
+            Self { query }
         }
     }
 
@@ -81,7 +85,10 @@ mod tests {
         assert!(track.is_ok());
         let track = track.unwrap();
 
-        assert_eq!(track.path, "/mnt/Data/Music/FLAC/Taylor Swift/Taylor Swift - Speak Now/12 - Haunted.mp3");
+        assert_eq!(
+            track.path,
+            "/mnt/Data/Music/FLAC/Taylor Swift/Taylor Swift - Speak Now/12 - Haunted.mp3"
+        );
         assert_eq!(track.status, TrackStatus::Playing);
         assert_eq!(track.position, 34);
         assert_eq!(track.duration, 242);

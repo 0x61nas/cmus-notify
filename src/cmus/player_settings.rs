@@ -1,6 +1,6 @@
+use crate::cmus::CmusError;
 use std::num::ParseIntError;
 use std::str::FromStr;
-use crate::cmus::CmusError;
 
 #[derive(Debug, PartialEq)]
 pub struct PlayerSettings {
@@ -41,7 +41,7 @@ impl FromStr for AAAMode {
             "all" => Ok(Self::All),
             "album" => Ok(Self::Album),
             "artist" => Ok(Self::Artist),
-            _ => Err(CmusError::UnknownAAAMode(s.to_string()))
+            _ => Err(CmusError::UnknownAAAMode(s.to_string())),
         }
     }
 }
@@ -54,7 +54,7 @@ impl FromStr for Shuffle {
             "off" => Ok(Self::Off),
             "tracks" => Ok(Self::Tracks),
             "albums" => Ok(Self::Albums),
-            _ => Err(CmusError::UnknownShuffleMode(s.to_string()))
+            _ => Err(CmusError::UnknownShuffleMode(s.to_string())),
         }
     }
 }
@@ -72,15 +72,25 @@ impl FromStr for PlayerSettings {
         for line in s.lines() {
             if line.starts_with("set ") {
                 let line = &line[4..];
-                let (key, value) = line.split_once(" ").ok_or(CmusError::UnknownError("Corrupted cmus response".to_string()))?;
+                let (key, value) = line.split_once(" ").ok_or(CmusError::UnknownError(
+                    "Corrupted cmus response".to_string(),
+                ))?;
 
                 match key {
                     "repeat" => repeat = value == "true",
                     "repeat_current" => repeat_current = value == "true",
                     "shuffle" => shuffle = Shuffle::from_str(value)?,
                     "aaa_mode" => aaa_mode = AAAMode::from_str(value)?,
-                    "vol_left" => volume.left = value.parse().map_err(|e: ParseIntError| CmusError::UnknownError(e.to_string()))?,
-                    "vol_right" => volume.right = value.parse().map_err(|e: ParseIntError| CmusError::UnknownError(e.to_string()))?,
+                    "vol_left" => {
+                        volume.left = value
+                            .parse()
+                            .map_err(|e: ParseIntError| CmusError::UnknownError(e.to_string()))?
+                    }
+                    "vol_right" => {
+                        volume.right = value
+                            .parse()
+                            .map_err(|e: ParseIntError| CmusError::UnknownError(e.to_string()))?
+                    }
                     _ => {}
                 }
             }
@@ -110,7 +120,10 @@ mod tests {
         assert_eq!(all, Ok(AAAMode::All));
         assert_eq!(album, Ok(AAAMode::Album));
         assert_eq!(artist, Ok(AAAMode::Artist));
-        assert_eq!(unknown, Err(CmusError::UnknownAAAMode("unknown".to_string())));
+        assert_eq!(
+            unknown,
+            Err(CmusError::UnknownAAAMode("unknown".to_string()))
+        );
     }
 
     #[test]
@@ -123,7 +136,10 @@ mod tests {
         assert_eq!(off, Ok(Shuffle::Off));
         assert_eq!(tracks, Ok(Shuffle::Tracks));
         assert_eq!(albums, Ok(Shuffle::Albums));
-        assert_eq!(unknown, Err(CmusError::UnknownShuffleMode("unknown".to_string())));
+        assert_eq!(
+            unknown,
+            Err(CmusError::UnknownShuffleMode("unknown".to_string()))
+        );
     }
 
     #[test]
@@ -133,15 +149,18 @@ mod tests {
 
         let settings = PlayerSettings::from_str(setting_sample);
 
-        assert_eq!(settings, Ok(PlayerSettings {
-            repeat: false,
-            repeat_current: false,
-            shuffle: Shuffle::Tracks,
-            aaa_mode: AAAMode::Artist,
-            volume: Volume {
-                left: 46,
-                right: 46,
-            }
-        }));
+        assert_eq!(
+            settings,
+            Ok(PlayerSettings {
+                repeat: false,
+                repeat_current: false,
+                shuffle: Shuffle::Tracks,
+                aaa_mode: AAAMode::Artist,
+                volume: Volume {
+                    left: 46,
+                    right: 46,
+                }
+            })
+        );
     }
 }

@@ -1,0 +1,17 @@
+status playing
+file /mnt/Data/Music/FLAC/Taylor Swift/Taylor Swift - Speak Now/12 - Haunted.mp3
+duration 242
+position 34
+tag artist Taylor Swift
+tag album Speak Now
+tag title Haunted
+tag date 2010
+tag genre Pop
+tag discnumber 1
+tag tracknumber 12
+tag albumartist Taylor Swift
+tag replaygain_track_gain -11.3 dB
+tag composer Taylor Swift
+tag label Big Machine Records, LLC
+tag publisher Big Machine Records, LLC
+tag bpm 162

@@ -1,0 +1,13 @@
+set aaa_mode all
+set continue true
+set play_library false
+set play_sorted true
+set replaygain disabled
+set replaygain_limit true
+set replaygain_preamp 0.000000
+set repeat true
+set repeat_current false
+set shuffle off
+set softvol false
+set vol_left 17
+set vol_right 17

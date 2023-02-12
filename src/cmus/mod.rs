@@ -1,8 +1,13 @@
+mod events;
+mod query;
+mod player_settings;
+
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::num::ParseIntError;
 use std::str::FromStr;
 use typed_builder::TypedBuilder;
+use crate::cmus::query::CmusQueryResponse;
 
 #[derive(Debug, PartialEq, Default)]
 pub struct TrackMetadata {
@@ -26,7 +31,7 @@ pub struct Track {
     pub position: u32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum CmusError {
     CmusRunningError(String),
     UnknownStatus,
@@ -35,6 +40,8 @@ pub enum CmusError {
     DurationError(String),
     PositionError(String),
     UnknownError(String),
+    UnknownAAAMode(String),
+    UnknownShuffleMode(String),
 }
 
 impl Display for CmusError {
@@ -47,6 +54,8 @@ impl Display for CmusError {
             CmusError::DurationError(s) => write!(f, "Duration error: {}", s),
             CmusError::PositionError(s) => write!(f, "Position error: {}", s),
             CmusError::UnknownError(s) => write!(f, "Unknown error: {}", s),
+            CmusError::UnknownAAAMode(s) => write!(f, "Unknown AAA mode: {}", s),
+            CmusError::UnknownShuffleMode(s) => write!(f, "Unknown shuffle mode: {}", s),
         }
     }
 }
@@ -164,10 +173,10 @@ impl Track {
 }
 
 /// Make a status request to cmus.
-/// And collect the output, and parse it into a `Track`.
+/// And collect the output, and parse it into a `CmusQueryResponse`.
 /// If the cmus is not running, or the socket is not available, this function will return an error.
 #[inline]
-pub fn get_track(query_command: &mut std::process::Command) -> Result<Track, CmusError> {
+pub fn ping_cmus(query_command: &mut std::process::Command) -> Result<CmusQueryResponse, CmusError> {
     // Just run the command, and collect the output.
     let output = query_command
         .output()
@@ -182,7 +191,7 @@ pub fn get_track(query_command: &mut std::process::Command) -> Result<Track, Cmu
     let output =
         String::from_utf8(output.stdout).map_err(|e| CmusError::UnknownError(e.to_string()))?;
 
-    Track::from_str(&output).map_err(|e| CmusError::UnknownError(e.to_string()))
+    CmusQueryResponse::from_str(&output).map_err(|e| CmusError::UnknownError(e.to_string()))
 }
 
 /// Build the query command.

@@ -137,7 +137,7 @@ pub fn process_template_placeholders(template: &String, track: &cmus::Track) -> 
 }
 
 #[cfg(test)]
-mod tests 4
+mod tests {
     use super::*;
     use std::assert_matches::assert_matches;
     use std::str::FromStr;

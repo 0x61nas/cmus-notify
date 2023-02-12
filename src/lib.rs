@@ -1,6 +1,9 @@
-use crate::cmus;
+#![feature(assert_matches)]
+
 use std::path::Path;
 
+pub mod cmus;
+pub mod arguments;
 
 /// Extracts the first embedded picture from an ID3 tag of an Audio file.
 ///
@@ -16,6 +19,7 @@ use std::path::Path;
 /// # Example
 ///
 /// ```
+/// # use cmus_notify::get_embedded_art;
 /// let result = get_embedded_art("/path/to/track.mp3");
 ///
 /// match result {

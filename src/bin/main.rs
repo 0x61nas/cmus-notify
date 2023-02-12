@@ -1,11 +1,8 @@
 #![feature(assert_matches)]
 
-mod arguments;
-mod cmus;
-mod utils;
-
-use crate::cmus::query::CmusQueryResponse;
 use clap::Parser;
+
+use cmus_notify::{arguments, cmus::{self, CmusError, query::CmusQueryResponse}};
 
 macro_rules! sleep {
     ($time: expr) => {

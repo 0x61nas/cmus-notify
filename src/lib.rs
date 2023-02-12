@@ -41,9 +41,29 @@ pub fn get_embedded_art(track_path: &str) -> std::io::Result<Option<temp_file::T
     )?))
 }
 
-/// Search in the track directory for the cover image or the lyrics(depending on the `regx`).
-/// If the cover image or the lyrics is not found, search in the parent directory, and so on, until the max depth is reached.
-/// If the cover image or the lyrics is not found, return `None`.
+/// Searches for a file that matches the provided regular expression in the specified search directory and its subdirectories.
+///
+/// # Arguments
+///
+/// * `search_directory` - The directory to start the search from.
+/// * `max_depth` - The maximum number of parent directories to search in.
+/// * `regx` - The regular expression to match against the file names.
+///
+/// # Returns
+///
+/// Returns a `Result` containing the absolute path of the first file that matches the regular expression, or `None` if no such file is found.
+/// In case of error, the `Result` will contain an error value of type `std::io::Error`.
+///
+/// # Example
+///
+/// ```
+/// # use regex::Regex;
+/// # use cmus_notify::search_for;
+/// let regx = Regex::new(r".\.lrc$").unwrap(); // Match .lrc files
+/// let result = search_for("tests/samples/Owl City/Cinematic", 2, &regx);
+///
+/// assert_eq!(result.unwrap(), Some("tests/samples/Owl City/Cinematic/08 - Always.lrc".to_string()));
+/// ```
 pub fn search_for(
     search_directory: &str,
     max_depth: u8,
@@ -117,7 +137,7 @@ pub fn process_template_placeholders(template: &String, track: &cmus::Track) -> 
 }
 
 #[cfg(test)]
-mod tests {
+mod tests 4
     use super::*;
     use std::assert_matches::assert_matches;
     use std::str::FromStr;

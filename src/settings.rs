@@ -8,6 +8,18 @@ const NOTIFICATION_SUMMARY: &str = "{artist} - {title}";
 const NOTIFICATION_APP_NAME: &str = "C* Music Player";
 const DEFAULT_MAX_DEPTH: u8 = 3;
 const DEFAULT_INTERVAL_TIME: u64 = 1000; // 1000 ms
+const DEFAULT_VOLUME_CHANGE_NOTIFICATION_BODY: &str = "Volume changed to {volume}%";
+const DEFAULT_VOLUME_CHANGE_NOTIFICATION_SUMMARY: &str = "Volume changed";
+const DEFAULT_VOLUME_CHANGE_NOTIFICATION_TIMEOUT: u8 = 1;
+const DEFAULT_SHUFFLE_NOTIFICATION_BODY: &str = "Shuffle mode changed to {shuffle}";
+const DEFAULT_SHUFFLE_NOTIFICATION_SUMMARY: &str = "Shuffle mode changed";
+const DEFAULT_SHUFFLE_NOTIFICATION_TIMEOUT: u8 = 1;
+const DEFAULT_REPEAT_NOTIFICATION_BODY: &str = "Repeat mode changed to {repeat}";
+const DEFAULT_REPEAT_NOTIFICATION_SUMMARY: &str = "Repeat mode changed";
+const DEFAULT_REPEAT_NOTIFICATION_TIMEOUT: u8 = 1;
+const DEFAULT_AAAMODE_NOTIFICATION_BODY: &str = "AAA mode changed to {aaa_mode}";
+const DEFAULT_AAAMODE_NOTIFICATION_SUMMARY: &str = "AAA mode changed";
+const DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT: u8 = 1;
 
 #[derive(Parser, Debug, Serialize, Deserialize)]
 #[command(author, about, version, long_about = None)]
@@ -151,6 +163,57 @@ pub struct Settings {
     /// Show the player notifications, like if you change the shuffle mode, or the repeat mode, or the volume.
     #[arg(short = 'g', long)]
     pub show_player_notifications: bool,
+    /// The volume change notification body.
+    /// you can use the placeholders like "{volume}" in the body, it will be replaced with the shuffle mode.
+    ///
+    /// If you leave it empty, the notification will not be shown.
+    #[arg(short = 'B', long, default_value = DEFAULT_VOLUME_CHANGE_NOTIFICATION_BODY)]
+    pub volume_notification_body: String,
+    /// The volume change notification summary.
+    #[arg(short = 'E', long, default_value = DEFAULT_VOLUME_CHANGE_NOTIFICATION_SUMMARY)]
+    pub volume_notification_summary: String,
+    /// The time out of the volume change notification, in seconds.
+    #[arg(short = 'T', long, default_value_t = DEFAULT_VOLUME_CHANGE_NOTIFICATION_TIMEOUT)]
+    pub volume_notification_timeout: u8,
+    /// The shuffle mode change notification body.
+    /// you can use the placeholders like "{shuffle}" in the body, it will be replaced with the shuffle mode.
+    ///
+    /// If you leave it empty, the notification will not be shown.
+    #[arg(short = 'S', long, default_value = DEFAULT_SHUFFLE_NOTIFICATION_BODY)]
+    pub shuffle_notification_body: String,
+    /// The shuffle mode change notification summary.
+    /// you can use the placeholders like "{shuffle}" in the summary, it will be replaced with the shuffle mode.
+    #[arg(short = 'U', long, default_value = DEFAULT_SHUFFLE_NOTIFICATION_SUMMARY)]
+    pub shuffle_notification_summary: String,
+    /// The time out of the shuffle mode change notification, in seconds.
+    #[arg(short = 'Y', long, default_value_t = DEFAULT_SHUFFLE_NOTIFICATION_TIMEOUT)]
+    pub shuffle_notification_timeout: u8,
+    /// The repeat mode change notification body.
+    /// you can use the placeholders like "{repeat}" in the body, it will be replaced with the repeat mode.
+    ///
+    /// If you leave it empty, the notification will not be shown.
+    #[arg(short = 'R', long, default_value = DEFAULT_REPEAT_NOTIFICATION_BODY)]
+    pub repeat_notification_body: String,
+    /// The repeat mode change notification summary.
+    /// you can use the placeholders like "{repeat}" in the summary, it will be replaced with the repeat mode.
+    #[arg(short = 'G', long, default_value = DEFAULT_REPEAT_NOTIFICATION_SUMMARY)]
+    pub repeat_notification_summary: String,
+    /// The time out of the repeat mode change notification, in seconds.
+    #[arg(short = 'H', long, default_value_t = DEFAULT_REPEAT_NOTIFICATION_TIMEOUT)]
+    pub repeat_notification_timeout: u8,
+    /// The aaa mode change notification body.
+    /// you can use the placeholders like "{aaa_mode}" in the body, it will be replaced with the aaa mode.
+    ///
+    /// If you leave it empty, the notification will not be shown.
+    #[arg(short = 'A', long, default_value = DEFAULT_AAAMODE_NOTIFICATION_BODY)]
+    pub aaa_mode_notification_body: String,
+    /// The aaa mode change notification summary.
+    /// you can use the placeholders like "{aaa_mode}" in the summary, it will be replaced with the aaa mode.
+    #[arg(short = 'D', long, default_value = DEFAULT_AAAMODE_NOTIFICATION_SUMMARY)]
+    pub aaa_mode_notification_summary: String,
+    /// The time out of the aaa mode change notification, in seconds.
+    #[arg(short = 'F', long, default_value_t = DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT)]
+    pub aaa_mode_notification_timeout: u8,
 }
 
 impl Default for Settings {
@@ -178,6 +241,18 @@ impl Default for Settings {
             #[cfg(feature = "lyrics")]
             no_use_external_lyrics: false,
             show_player_notifications: false,
+            volume_notification_body: DEFAULT_VOLUME_CHANGE_NOTIFICATION_BODY.to_string(),
+            volume_notification_summary: DEFAULT_VOLUME_CHANGE_NOTIFICATION_SUMMARY.to_string(),
+            volume_notification_timeout: DEFAULT_VOLUME_CHANGE_NOTIFICATION_TIMEOUT,
+            shuffle_notification_body: DEFAULT_SHUFFLE_NOTIFICATION_BODY.to_string(),
+            shuffle_notification_summary: DEFAULT_SHUFFLE_NOTIFICATION_SUMMARY.to_string(),
+            shuffle_notification_timeout: DEFAULT_SHUFFLE_NOTIFICATION_TIMEOUT,
+            repeat_notification_body: DEFAULT_REPEAT_NOTIFICATION_BODY.to_string(),
+            repeat_notification_summary: DEFAULT_REPEAT_NOTIFICATION_SUMMARY.to_string(),
+            repeat_notification_timeout: DEFAULT_REPEAT_NOTIFICATION_TIMEOUT,
+            aaa_mode_notification_body: DEFAULT_AAAMODE_NOTIFICATION_BODY.to_string(),
+            aaa_mode_notification_summary: DEFAULT_AAAMODE_NOTIFICATION_SUMMARY.to_string(),
+            aaa_mode_notification_timeout: DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT,
         }
     }
 }
@@ -249,6 +324,9 @@ impl Settings {
         #[cfg(feature = "lyrics")]
         if args.no_use_external_lyrics == false {
             args.no_use_external_lyrics = cfg.no_use_external_lyrics;
+        }
+        if args.show_player_notifications == false {
+            args.show_player_notifications = cfg.show_player_notifications;
         }
 
         args

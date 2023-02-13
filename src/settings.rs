@@ -328,6 +328,42 @@ impl Settings {
         if args.show_player_notifications == false {
             args.show_player_notifications = cfg.show_player_notifications;
         }
+        if args.volume_notification_body == DEFAULT_VOLUME_CHANGE_NOTIFICATION_BODY {
+            args.volume_notification_body = cfg.volume_notification_body;
+        }
+        if args.volume_notification_summary == DEFAULT_VOLUME_CHANGE_NOTIFICATION_SUMMARY {
+            args.volume_notification_summary = cfg.volume_notification_summary;
+        }
+        if args.volume_notification_timeout == DEFAULT_VOLUME_CHANGE_NOTIFICATION_TIMEOUT {
+            args.volume_notification_timeout = cfg.volume_notification_timeout;
+        }
+        if args.shuffle_notification_body == DEFAULT_SHUFFLE_NOTIFICATION_BODY {
+            args.shuffle_notification_body = cfg.shuffle_notification_body;
+        }
+        if args.shuffle_notification_summary == DEFAULT_SHUFFLE_NOTIFICATION_SUMMARY {
+            args.shuffle_notification_summary = cfg.shuffle_notification_summary;
+        }
+        if args.shuffle_notification_timeout == DEFAULT_SHUFFLE_NOTIFICATION_TIMEOUT {
+            args.shuffle_notification_timeout = cfg.shuffle_notification_timeout;
+        }
+        if args.repeat_notification_body == DEFAULT_REPEAT_NOTIFICATION_BODY {
+            args.repeat_notification_body = cfg.repeat_notification_body;
+        }
+        if args.repeat_notification_summary == DEFAULT_REPEAT_NOTIFICATION_SUMMARY {
+            args.repeat_notification_summary = cfg.repeat_notification_summary;
+        }
+        if args.repeat_notification_timeout == DEFAULT_REPEAT_NOTIFICATION_TIMEOUT {
+            args.repeat_notification_timeout = cfg.repeat_notification_timeout;
+        }
+        if args.aaa_mode_notification_body == DEFAULT_AAAMODE_NOTIFICATION_BODY {
+            args.aaa_mode_notification_body = cfg.aaa_mode_notification_body;
+        }
+        if args.aaa_mode_notification_summary == DEFAULT_AAAMODE_NOTIFICATION_SUMMARY {
+            args.aaa_mode_notification_summary = cfg.aaa_mode_notification_summary;
+        }
+        if args.aaa_mode_notification_timeout == DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT {
+            args.aaa_mode_notification_timeout = cfg.aaa_mode_notification_timeout;
+        }
 
         args
     }

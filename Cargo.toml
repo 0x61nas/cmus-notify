@@ -29,4 +29,5 @@ lyrics = ["lrc"]
 default = ["lyrics"]
 
 [dev-dependencies]
+cargo-expand = "1.0.40"
 test-context = "0.1.4"

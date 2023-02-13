@@ -1,12 +1,12 @@
-use crate::cmus::player_settings::AAAMode;
-use crate::cmus::TrackStatus;
+use crate::cmus::player_settings::{AAAMode, Shuffle};
+use crate::cmus::{Track, TrackStatus};
 
 pub enum CmusEvent {
     StatusChanged(TrackStatus),
-    TrackChanged,
+    TrackChanged(Track),
     VolumeChanged { left: u8, right: u8 },
     PositionChanged(u32),
-    ShuffleChanged(bool),
+    ShuffleChanged(Shuffle),
     RepeatChanged(bool),
     AAAMode(AAAMode),
 }

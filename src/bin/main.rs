@@ -1,9 +1,4 @@
-use clap::Parser;
-
-use cmus_notify::{
-    settings::Settings,
-    cmus::{self, query::CmusQueryResponse, CmusError},
-};
+use cmus_notify::{cmus::{self, query::CmusQueryResponse}, notification, settings::Settings, TrackCover};
 
 macro_rules! sleep {
     ($time: expr) => {
@@ -16,11 +11,11 @@ fn main() {
     let settings = Settings::load_config_and_parse_args();
 
     // Build the command, or use the default. (to speed up the main loop, because we don't need to build it every time)
+    let remote_bin_path = settings
+        .cmus_remote_bin_path.clone()
+        .unwrap_or("cmus-remote".to_string());
     let mut query_command = cmus::build_query_command(
-        &settings
-            .cmus_remote_bin_path
-            .unwrap_or("cmus-remote".to_string())
-            .as_str(),
+        remote_bin_path.as_str(),
         &settings.cmus_socket_address,
         &settings.cmus_socket_password,
     );
@@ -30,10 +25,10 @@ fn main() {
     // Initialize the buffer to store the cover path, to compare it with the next one.
     // This is used to speed up the main loop, because we don't need to process the template and search for the cover every time.
     // We only need to do it when the track directory changes.
-    let mut previous_cover_path: Option<String> = None;
+    let mut previous_cover = TrackCover::None;
 
     loop {
-        // Get the track info, and compare it with the previous one.
+        // Get the response from cmus.
         let Ok(response) = cmus::ping_cmus(&mut query_command) else {
             if settings.link {
                 std::process::exit(0)
@@ -44,16 +39,16 @@ fn main() {
             }
         };
 
-        /*        // Compare the track info with the previous one, and if they are the same, just sleep for a while and try again.
-                if track == previous_track {
-                    sleep();
-                    continue;
-                }
+        // Compare the response with the previous one.
+        if response != previous_response {
+            // Get the events (the changes) from the response.
+            if let Ok(events) = previous_response.events(&response) {
+                // Update the previous response.
+                previous_response = response;
 
-                // If the track info is different from the previous one, get the changes events.
-                let changes = track.get_changes(&previous_track);
-        */
-
+                notification::show_notification(events, &settings, &mut previous_cover);
+            }
+        }
         sleep!(settings.interval);
     }
 }

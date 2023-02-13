@@ -1,3 +1,4 @@
+use crate::cmus::events::CmusEvent;
 use crate::cmus::player_settings::PlayerSettings;
 use crate::cmus::{CmusError, Track};
 use std::str::FromStr;
@@ -36,6 +37,51 @@ impl CmusQueryResponse {
     #[inline(always)]
     pub fn player_settings(&self) -> Result<PlayerSettings, CmusError> {
         PlayerSettings::from_str(&self.player_settings_row)
+    }
+
+    pub fn events(&self, other: &Self) -> Result<Vec<CmusEvent>, CmusError> {
+        if self.track_row.is_empty() || self.player_settings_row.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let mut events = Vec::new();
+
+        let track = self.track()?;
+        let other_track = other.track()?;
+
+        if track != other_track {
+            if track.status != other_track.status {
+                events.push(CmusEvent::StatusChanged(other_track.status));
+            } else {
+                events.push(CmusEvent::TrackChanged(other_track));
+            }
+        }
+
+        let player_settings = self.player_settings()?;
+        let other_player_settings = other.player_settings()?;
+
+        if player_settings != other_player_settings {
+            if player_settings.shuffle != other_player_settings.shuffle {
+                events.push(CmusEvent::ShuffleChanged(player_settings.shuffle));
+            }
+
+            if player_settings.repeat != other_player_settings.repeat {
+                events.push(CmusEvent::RepeatChanged(player_settings.repeat));
+            }
+
+            if player_settings.aaa_mode != other_player_settings.aaa_mode {
+                events.push(CmusEvent::AAAMode(player_settings.aaa_mode));
+            }
+
+            if player_settings.volume != other_player_settings.volume {
+                events.push(CmusEvent::VolumeChanged {
+                    left: player_settings.volume.left,
+                    right: player_settings.volume.right,
+                });
+            }
+        }
+
+        Ok(events)
     }
 }
 

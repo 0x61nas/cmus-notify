@@ -148,6 +148,9 @@ pub struct Settings {
     /// No use the external lyrics file, even if it's available and the track's metadata doesn't have a lyrics.
     #[arg(short = 'o', long)]
     pub no_use_external_lyrics: bool,
+    /// Show the player notifications, like if you change the shuffle mode, or the repeat mode, or the volume.
+    #[arg(short = 'g', long)]
+    pub show_player_notifications: bool,
 }
 
 impl Default for Settings {
@@ -174,6 +177,7 @@ impl Default for Settings {
             no_use_external_cover: false,
             #[cfg(feature = "lyrics")]
             no_use_external_lyrics: false,
+            show_player_notifications: false,
         }
     }
 }

@@ -11,7 +11,7 @@ const DEFAULT_INTERVAL_TIME: u64 = 1000; // 1000 ms
 
 #[derive(Parser, Debug, Serialize, Deserialize)]
 #[command(author, about, version, long_about = None)]
-pub struct Arguments {
+pub struct Settings {
     /// The notification timeout, in seconds
     #[arg(short, long, default_value_t = NOTIFICATION_TIMEOUT)]
     pub timeout: u8,
@@ -150,7 +150,7 @@ pub struct Arguments {
     pub no_use_external_lyrics: bool,
 }
 
-impl Default for Arguments {
+impl Default for Settings {
     fn default() -> Self {
         Self {
             timeout: NOTIFICATION_TIMEOUT,
@@ -178,7 +178,7 @@ impl Default for Arguments {
     }
 }
 
-impl Arguments {
+impl Settings {
     pub fn load_config_and_parse_args() -> Self {
         // load config file
         let cfg: Self = match confy::load("cmus-notify", "config") {
@@ -190,7 +190,7 @@ impl Arguments {
         };
 
         // parse the args
-        let mut args = Arguments::parse();
+        let mut args = Settings::parse();
 
         // Combine the config and args(the args will override the config)
         if args.timeout == NOTIFICATION_TIMEOUT {

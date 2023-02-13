@@ -1,8 +1,7 @@
 use clap::Parser;
 
-use cmus_notify::arguments::Arguments;
 use cmus_notify::{
-    arguments,
+    settings::Settings,
     cmus::{self, query::CmusQueryResponse, CmusError},
 };
 
@@ -13,17 +12,17 @@ macro_rules! sleep {
 }
 
 fn main() {
-    // Load the configs
-    let settings = Arguments::load_config_and_parse_args();
+    // Load the configs and parse the arguments, and combine them together.
+    let settings = Settings::load_config_and_parse_args();
 
     // Build the command, or use the default. (to speed up the main loop, because we don't need to build it every time)
     let mut query_command = cmus::build_query_command(
-        &args
+        &settings
             .cmus_remote_bin_path
             .unwrap_or("cmus-remote".to_string())
             .as_str(),
-        &args.cmus_socket_address,
-        &args.cmus_socket_password,
+        &settings.cmus_socket_address,
+        &settings.cmus_socket_password,
     );
 
     // Initialize the buffer to store the response from cmus, to compare it with the next one.
@@ -36,11 +35,11 @@ fn main() {
     loop {
         // Get the track info, and compare it with the previous one.
         let Ok(response) = cmus::ping_cmus(&mut query_command) else {
-            if args.link {
+            if settings.link {
                 std::process::exit(0)
             } else {
                 // If the track info is the same as the previous one, just sleep for a while and try again.
-                sleep!(args.interval);
+                sleep!(settings.interval);
                 continue;
             }
         };
@@ -55,6 +54,6 @@ fn main() {
                 let changes = track.get_changes(&previous_track);
         */
 
-        sleep!(args.interval);
+        sleep!(settings.interval);
     }
 }

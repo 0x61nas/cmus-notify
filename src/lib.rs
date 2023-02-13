@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-pub mod arguments;
+pub mod settings;
 pub mod cmus;
 
 /// Extracts the first embedded picture from an ID3 tag of an Audio file.

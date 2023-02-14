@@ -20,6 +20,11 @@ const DEFAULT_REPEAT_NOTIFICATION_TIMEOUT: u8 = 1;
 const DEFAULT_AAAMODE_NOTIFICATION_BODY: &str = "AAA mode changed to {aaa_mode}";
 const DEFAULT_AAAMODE_NOTIFICATION_SUMMARY: &str = "AAA mode changed";
 const DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT: u8 = 1;
+#[cfg(feature = "lyrics")]
+const DEFAULT_LYRICS_NOTIFICATION_BODY: &str = "{lyrics}";
+#[cfg(feature = "lyrics")]
+const DEFAULT_LYRICS_NOTIFICATION_SUMMARY: &str = "Lyrics";
+
 
 #[derive(Parser, Debug, Serialize, Deserialize)]
 #[command(author, about, version, long_about = None)]
@@ -214,6 +219,18 @@ pub struct Settings {
     /// The time out of the aaa mode change notification, in seconds.
     #[arg(short = 'F', long, default_value_t = DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT)]
     pub aaa_mode_notification_timeout: u8,
+    #[cfg(feature = "lyrics")]
+    /// The lyrics notification body, if you want to show the lyrics separate notification.
+    /// you can use the placeholders like "{lyrics}" in the body, it will be replaced with the lyrics.
+    ///
+    /// If you leave it empty, the notification will not be shown.
+    #[arg(short = 'L', long, default_value = DEFAULT_LYRICS_NOTIFICATION_BODY)]
+    pub lyrics_notification_body: String,
+    #[cfg(feature = "lyrics")]
+    /// The lyrics notification summary, if you want to show the lyrics separate notification.
+    /// you can use the placeholders like "{lyrics}" in the summary, it will be replaced with the lyrics.
+    #[arg(short = 'M', long, default_value = DEFAULT_LYRICS_NOTIFICATION_SUMMARY)]
+    pub lyrics_notification_summary: String,
 }
 
 impl Default for Settings {
@@ -253,6 +270,10 @@ impl Default for Settings {
             aaa_mode_notification_body: DEFAULT_AAAMODE_NOTIFICATION_BODY.to_string(),
             aaa_mode_notification_summary: DEFAULT_AAAMODE_NOTIFICATION_SUMMARY.to_string(),
             aaa_mode_notification_timeout: DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT,
+            #[cfg(feature = "lyrics")]
+            lyrics_notification_body: DEFAULT_LYRICS_NOTIFICATION_BODY.to_string(),
+            #[cfg(feature = "lyrics")]
+            lyrics_notification_summary: DEFAULT_LYRICS_NOTIFICATION_SUMMARY.to_string(),
         }
     }
 }

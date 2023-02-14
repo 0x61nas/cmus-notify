@@ -1,10 +1,12 @@
 #![feature(assert_matches)]
 
+#[cfg(feature = "debug")]
+use log::{debug, info};
 use std::path::Path;
 
 pub mod cmus;
-pub mod settings;
 pub mod notification;
+pub mod settings;
 
 /// Extracts the first embedded picture from an ID3 tag of an Audio file.
 ///
@@ -70,6 +72,11 @@ pub fn search_for(
     max_depth: u8,
     regx: &regex::Regex,
 ) -> std::io::Result<Option<String>> {
+    #[cfg(feature = "debug")]
+    {
+        info!("Searching for a file that matches the regular {regx:?} expression in \"{search_directory}\" and its subdirectories.");
+        info!("Max depth: {max_depth}");
+    }
     let mut max_depth = max_depth;
     let mut search_directory = search_directory;
 
@@ -81,6 +88,11 @@ pub fn search_for(
         if max_depth == 0 {
             break Ok(None);
         } else {
+            #[cfg(feature = "debug")]
+            {
+                info!("Could not find a file that matches the regular {regx:?} expression in \"{search_directory}\", searching in the parent directory.");
+                info!("Max depth: {max_depth}");
+            }
             // If the max depth is not reached, search in the parent directory.
             max_depth -= 1;
             search_directory = {
@@ -116,12 +128,16 @@ pub fn track_cover(
     no_use_external_cover: bool,
 ) -> TrackCover {
     if !force_use_external_cover {
+        #[cfg(feature = "debug")]
+        info!("Trying to get the embedded cover of \"{track_path}\".");
         if let Ok(Some(cover)) = get_embedded_art(track_path) {
             return TrackCover::Embedded(cover);
         }
     }
 
     if !no_use_external_cover {
+        #[cfg(feature = "debug")]
+        info!("Trying to get the external cover of \"{track_path}\".");
         if let Ok(Some(cover)) = search_for(
             track_path,
             max_depth,
@@ -130,6 +146,9 @@ pub fn track_cover(
             return TrackCover::External(cover);
         }
     }
+
+    #[cfg(feature = "debug")]
+    info!("Could not get the cover of \"{track_path}\".");
 
     TrackCover::None
 }
@@ -155,6 +174,12 @@ fn search(search_directory: &str, matcher: &regex::Regex) -> std::io::Result<Opt
 /// Replace all the placeholders in the template with their matching value.
 #[inline]
 pub fn process_template_placeholders(template: &String, track: &cmus::Track) -> String {
+    #[cfg(feature = "debug")]
+    {
+        info!("Processing the template placeholders.");
+        debug!("Template: {template}");
+        debug!("Track: {track:?}");
+    }
     let mut processed = template.clone();
 
     let mut key = String::new(); // Just a buffer to store the key.
@@ -163,6 +188,8 @@ pub fn process_template_placeholders(template: &String, track: &cmus::Track) -> 
         if c == '{' {
             key = String::new();
         } else if c == '}' {
+            #[cfg(feature = "debug")]
+            debug!("Replacing the placeholder {{{key}}} with its matching value.");
             // Replace the key with their matching value if exists, if not replace with the empty string.
             processed = processed.replace(
                 &format!("{{{}}}", key),
@@ -175,6 +202,9 @@ pub fn process_template_placeholders(template: &String, track: &cmus::Track) -> 
             key.push(c);
         }
     }
+
+    #[cfg(feature = "debug")]
+    debug!("Processed template: {processed}");
 
     processed
 }

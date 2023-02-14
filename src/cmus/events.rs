@@ -1,6 +1,7 @@
 use crate::cmus::player_settings::{AAAMode, Shuffle};
 use crate::cmus::{Track, TrackStatus};
 
+#[derive(Debug)]
 pub enum CmusEvent {
     StatusChanged(TrackStatus),
     TrackChanged(Track),

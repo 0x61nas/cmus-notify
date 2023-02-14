@@ -1,4 +1,14 @@
-use cmus_notify::{cmus::{self, query::CmusQueryResponse}, notification, settings::Settings, TrackCover};
+use cmus_notify::{
+    cmus::{self, query::CmusQueryResponse},
+    notification,
+    settings::Settings,
+    TrackCover,
+};
+#[cfg(feature = "debug")]
+extern crate pretty_env_logger;
+#[cfg(feature = "debug")]
+#[macro_use]
+extern crate log;
 
 macro_rules! sleep {
     ($time: expr) => {
@@ -7,18 +17,37 @@ macro_rules! sleep {
 }
 
 fn main() {
+    #[cfg(feature = "debug")]
+    {
+        pretty_env_logger::init();
+        info!("Starting cmus-notify...");
+        info!("Debug mode is enabled. (feature \"debug\")");
+        info!("Binary path: {}", file!());
+        info!("Parsing the arguments and loading the configs...")
+    }
     // Load the configs and parse the arguments, and combine them together.
     let settings = Settings::load_config_and_parse_args();
 
+    #[cfg(feature = "debug")]
+    {
+        info!("Configs loaded, and arguments parsed.");
+        info!("Settings: {:#?}", settings);
+    }
+
     // Build the command, or use the default. (to speed up the main loop, because we don't need to build it every time)
     let remote_bin_path = settings
-        .cmus_remote_bin_path.clone()
+        .cmus_remote_bin_path
+        .clone()
         .unwrap_or("cmus-remote".to_string());
     let mut query_command = cmus::build_query_command(
         remote_bin_path.as_str(),
         &settings.cmus_socket_address,
         &settings.cmus_socket_password,
     );
+    #[cfg(feature = "debug")]
+    {
+        info!("Query command built: {:?}", query_command);
+    }
 
     // Initialize the buffer to store the response from cmus, to compare it with the next one.
     let mut previous_response = CmusQueryResponse::default();
@@ -34,6 +63,9 @@ fn main() {
                 std::process::exit(0)
             } else {
                 // If the track info is the same as the previous one, just sleep for a while and try again.
+                #[cfg(feature = "debug")] {
+                    info!("Cmus is not running, sleeping for {} ms...", settings.interval);
+                }
                 sleep!(settings.interval);
                 continue;
             }
@@ -46,7 +78,8 @@ fn main() {
                 // Update the previous response.
                 previous_response = response;
 
-                notification::show_notification(events, &settings, &mut previous_cover); // TODO: Handle the error.
+                notification::show_notification(events, &settings, &mut previous_cover);
+                // TODO: Handle the error.
             }
         }
         sleep!(settings.interval);

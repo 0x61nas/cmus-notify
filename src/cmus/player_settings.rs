@@ -1,6 +1,8 @@
 use crate::cmus::CmusError;
 use std::num::ParseIntError;
 use std::str::FromStr;
+#[cfg(feature = "debug")]
+use log::{info, debug};
 
 #[derive(Debug, PartialEq)]
 pub struct PlayerSettings {
@@ -63,6 +65,8 @@ impl FromStr for PlayerSettings {
     type Err = CmusError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        #[cfg(feature = "debug")]
+        info!("Parsing cmus response from string: {}", s);
         let mut repeat = false;
         let mut repeat_current = false;
         let mut shuffle = Shuffle::default();
@@ -70,6 +74,8 @@ impl FromStr for PlayerSettings {
         let mut volume = Volume::default();
 
         for line in s.lines() {
+            #[cfg(feature = "debug")]
+            debug!("Parsing line: {}", line);
             if line.starts_with("set ") {
                 let line = &line[4..];
                 let (key, value) = line.split_once(" ").ok_or(CmusError::UnknownError(

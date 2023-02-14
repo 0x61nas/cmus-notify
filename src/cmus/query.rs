@@ -1,6 +1,9 @@
 use crate::cmus::events::CmusEvent;
 use crate::cmus::player_settings::PlayerSettings;
 use crate::cmus::{CmusError, Track};
+use log::debug;
+#[cfg(feature = "debug")]
+use log::info;
 use std::str::FromStr;
 
 /// This struct is used to store the row status response from cmus.
@@ -17,6 +20,9 @@ impl FromStr for CmusQueryResponse {
 
     #[inline]
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        #[cfg(feature = "debug")]
+        info!("Parsing cmus response from string: {}", s);
+
         let sep_index = s.find("set ").ok_or("Corrupted cmus response")?;
 
         Ok(Self {
@@ -40,7 +46,12 @@ impl CmusQueryResponse {
     }
 
     pub fn events(&self, other: &Self) -> Result<Vec<CmusEvent>, CmusError> {
+        #[cfg(feature = "debug")]
+        info!("Comparing cmus responses: {:?} and {:?}", self, other);
+
         if self.track_row.is_empty() || self.player_settings_row.is_empty() {
+            #[cfg(feature = "debug")]
+            info!("Cmus response is empty, returning empty events");
             return Ok(Vec::new());
         }
 
@@ -50,12 +61,25 @@ impl CmusQueryResponse {
         let other_track = other.track()?;
 
         if track != other_track {
+            #[cfg(feature = "debug")]
+            debug!("Track changed: {:?} -> {:?}", other_track, track);
+
             if track.status != other_track.status {
+                #[cfg(feature = "debug")]
+                debug!(
+                    "Status changed: {:?} -> {:?}",
+                    other_track.status, track.status
+                );
                 events.push(CmusEvent::StatusChanged(other_track.status));
             } else if track.position != other_track.position {
+                #[cfg(feature = "debug")]
+                debug!(
+                    "Position changed: {:?} -> {:?}",
+                    other_track.position, track.position
+                );
                 events.push(CmusEvent::PositionChanged(other_track.position));
             } else {
-                events.push(CmusEvent::TrackChanged(other_track));
+                events.push(CmusEvent::TrackChanged(other_track)); // FIXME: if the track changed, and the status or possition changed, we should push the track changed event, not position or status changed.
             }
         }
 
@@ -63,25 +87,58 @@ impl CmusQueryResponse {
         let other_player_settings = other.player_settings()?;
 
         if player_settings != other_player_settings {
+            #[cfg(feature = "debug")]
+            debug!(
+                "Player settings changed: {:?} -> {:?}",
+                other_player_settings, player_settings
+            );
+
             if player_settings.shuffle != other_player_settings.shuffle {
+                #[cfg(feature = "debug")]
+                debug!(
+                    "Shuffle changed: {:?} -> {:?}",
+                    other_player_settings.shuffle, player_settings.shuffle
+                );
+
                 events.push(CmusEvent::ShuffleChanged(player_settings.shuffle));
             }
 
             if player_settings.repeat != other_player_settings.repeat {
+                #[cfg(feature = "debug")]
+                debug!(
+                    "Repeat changed: {:?} -> {:?}",
+                    other_player_settings.repeat, player_settings.repeat
+                );
+
                 events.push(CmusEvent::RepeatChanged(player_settings.repeat));
             }
 
             if player_settings.aaa_mode != other_player_settings.aaa_mode {
+                #[cfg(feature = "debug")]
+                debug!(
+                    "AAA mode changed: {:?} -> {:?}",
+                    other_player_settings.aaa_mode, player_settings.aaa_mode
+                );
+
                 events.push(CmusEvent::AAAMode(player_settings.aaa_mode));
             }
 
             if player_settings.volume != other_player_settings.volume {
+                #[cfg(feature = "debug")]
+                debug!(
+                    "Volume changed: {:?} -> {:?}",
+                    other_player_settings.volume, player_settings.volume
+                );
+
                 events.push(CmusEvent::VolumeChanged {
                     left: player_settings.volume.left,
                     right: player_settings.volume.right,
                 });
             }
         }
+
+        #[cfg(feature = "debug")]
+        info!("Returning events: {:?}", events);
 
         Ok(events)
     }

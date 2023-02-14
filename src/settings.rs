@@ -1,4 +1,6 @@
 use clap::Parser;
+#[cfg(feature = "debug")]
+use log::{debug, info};
 use serde::{Deserialize, Serialize};
 
 const NOTIFICATION_TIMEOUT: u8 = 5;
@@ -24,7 +26,6 @@ const DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT: u8 = 1;
 const DEFAULT_LYRICS_NOTIFICATION_BODY: &str = "{lyrics}";
 #[cfg(feature = "lyrics")]
 const DEFAULT_LYRICS_NOTIFICATION_SUMMARY: &str = "Lyrics";
-
 
 #[derive(Parser, Debug, Serialize, Deserialize)]
 #[command(author, about, version, long_about = None)]
@@ -279,7 +280,14 @@ impl Default for Settings {
 }
 
 impl Settings {
+    /// Load the config file and parse the args.
+    /// And combine them together.
+    /// The args will override the config.
+    /// If the config file is not found, create a new one, and use the default values.
+    /// If the config file is found, but the config is invalid, use the default values.
     pub fn load_config_and_parse_args() -> Self {
+        #[cfg(feature = "debug")]
+        info!("Loading config and parsing args...");
         // load config file
         let cfg: Self = match confy::load("cmus-notify", "config") {
             Ok(cfg) => cfg,
@@ -289,17 +297,38 @@ impl Settings {
             }
         };
 
+        #[cfg(feature = "debug")]
+        {
+            debug!("Config: {:?}", cfg);
+            info!("Parsing args...")
+        }
+
         // parse the args
         let mut args = Settings::parse();
 
+        #[cfg(feature = "debug")]
+        {
+            debug!("Args: {:?}", args);
+            info!("Combining config and args...")
+        }
+
         // Combine the config and args(the args will override the config)
         if args.timeout == NOTIFICATION_TIMEOUT {
+            #[cfg(feature = "debug")]
+            debug!(
+                "The user not override the timeout, using the config's timeout. timeout: {}",
+                cfg.timeout
+            );
             args.timeout = cfg.timeout;
         }
         if args.persistent == false {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the persistent, using the config's persistent. persistent: {}", cfg.persistent);
             args.persistent = cfg.persistent;
         }
         if args.show_track_cover == true {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the show_track_cover, using the config's show_track_cover. show_track_cover: {}", cfg.show_track_cover);
             args.show_track_cover = cfg.show_track_cover;
         }
         args.notification_static_icon = args
@@ -308,83 +337,152 @@ impl Settings {
         args.cover_path = args.cover_path.or(cfg.cover_path);
         #[cfg(feature = "lyrics")]
         if args.lyrics_path == None {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the lyrics_path, using the config's lyrics_path. lyrics_path: {:?}", cfg.lyrics_path);
             args.lyrics_path = cfg.lyrics_path;
         }
 
         if args.depth == DEFAULT_MAX_DEPTH {
+            #[cfg(feature = "debug")]
+            debug!(
+                "The user not override the depth, using the config's depth. depth: {}",
+                cfg.depth
+            );
             args.depth = cfg.depth;
         }
         if args.app_name == NOTIFICATION_APP_NAME {
+            #[cfg(feature = "debug")]
+            debug!(
+                "The user not override the app_name, using the config's app_name. app_name: {}",
+                cfg.app_name
+            );
             args.app_name = cfg.app_name;
         }
         if args.summary == NOTIFICATION_SUMMARY {
+            #[cfg(feature = "debug")]
+            debug!(
+                "The user not override the summary, using the config's summary. summary: {}",
+                cfg.summary
+            );
             args.summary = cfg.summary;
         }
         if args.body == NOTIFICATION_BODY {
+            #[cfg(feature = "debug")]
+            debug!(
+                "The user not override the body, using the config's body. body: {}",
+                cfg.body
+            );
             args.body = cfg.body;
         }
         args.cmus_remote_bin_path = args.cmus_remote_bin_path.or(cfg.cmus_remote_bin_path);
         args.cmus_socket_address = args.cmus_socket_address.or(cfg.cmus_socket_address);
         args.cmus_socket_password = args.cmus_socket_password.or(cfg.cmus_socket_password);
         if args.interval == DEFAULT_INTERVAL_TIME {
+            #[cfg(feature = "debug")]
+            debug!(
+                "The user not override the interval, using the config's interval. interval: {}",
+                cfg.interval
+            );
             args.interval = cfg.interval;
         }
         if args.link == false {
+            #[cfg(feature = "debug")]
+            debug!(
+                "The user not override the link, using the config's link. link: {}",
+                cfg.link
+            );
             args.link = cfg.link;
         }
         if args.force_use_external_cover == false {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the force_use_external_cover, using the config's force_use_external_cover. force_use_external_cover: {}", cfg.force_use_external_cover);
             args.force_use_external_cover = cfg.force_use_external_cover;
         }
         #[cfg(feature = "lyrics")]
         if args.force_use_external_lyrics == false {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the force_use_external_lyrics, using the config's force_use_external_lyrics. force_use_external_lyrics: {}", cfg.force_use_external_lyrics);
             args.force_use_external_lyrics = cfg.force_use_external_lyrics;
         }
         if args.no_use_external_cover == false {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the no_use_external_cover, using the config's no_use_external_cover. no_use_external_cover: {}", cfg.no_use_external_cover);
             args.no_use_external_cover = cfg.no_use_external_cover;
         }
         #[cfg(feature = "lyrics")]
         if args.no_use_external_lyrics == false {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the no_use_external_lyrics, using the config's no_use_external_lyrics. no_use_external_lyrics: {}", cfg.no_use_external_lyrics);
             args.no_use_external_lyrics = cfg.no_use_external_lyrics;
         }
         if args.show_player_notifications == false {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the show_player_notifications, using the config's show_player_notifications. show_player_notifications: {}", cfg.show_player_notifications);
             args.show_player_notifications = cfg.show_player_notifications;
         }
         if args.volume_notification_body == DEFAULT_VOLUME_CHANGE_NOTIFICATION_BODY {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the volume_notification_body, using the config's volume_notification_body. volume_notification_body: {}", cfg.volume_notification_body);
             args.volume_notification_body = cfg.volume_notification_body;
         }
         if args.volume_notification_summary == DEFAULT_VOLUME_CHANGE_NOTIFICATION_SUMMARY {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the volume_notification_summary, using the config's volume_notification_summary. volume_notification_summary: {}", cfg.volume_notification_summary);
             args.volume_notification_summary = cfg.volume_notification_summary;
         }
         if args.volume_notification_timeout == DEFAULT_VOLUME_CHANGE_NOTIFICATION_TIMEOUT {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the volume_notification_timeout, using the config's volume_notification_timeout. volume_notification_timeout: {}", cfg.volume_notification_timeout);
             args.volume_notification_timeout = cfg.volume_notification_timeout;
         }
         if args.shuffle_notification_body == DEFAULT_SHUFFLE_NOTIFICATION_BODY {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the shuffle_notification_body, using the config's shuffle_notification_body. shuffle_notification_body: {}", cfg.shuffle_notification_body);
             args.shuffle_notification_body = cfg.shuffle_notification_body;
         }
         if args.shuffle_notification_summary == DEFAULT_SHUFFLE_NOTIFICATION_SUMMARY {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the shuffle_notification_summary, using the config's shuffle_notification_summary. shuffle_notification_summary: {}", cfg.shuffle_notification_summary);
             args.shuffle_notification_summary = cfg.shuffle_notification_summary;
         }
         if args.shuffle_notification_timeout == DEFAULT_SHUFFLE_NOTIFICATION_TIMEOUT {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the shuffle_notification_timeout, using the config's shuffle_notification_timeout. shuffle_notification_timeout: {}", cfg.shuffle_notification_timeout);
             args.shuffle_notification_timeout = cfg.shuffle_notification_timeout;
         }
         if args.repeat_notification_body == DEFAULT_REPEAT_NOTIFICATION_BODY {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the repeat_notification_body, using the config's repeat_notification_body. repeat_notification_body: {}", cfg.repeat_notification_body);
             args.repeat_notification_body = cfg.repeat_notification_body;
         }
         if args.repeat_notification_summary == DEFAULT_REPEAT_NOTIFICATION_SUMMARY {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the repeat_notification_summary, using the config's repeat_notification_summary. repeat_notification_summary: {}", cfg.repeat_notification_summary);
             args.repeat_notification_summary = cfg.repeat_notification_summary;
         }
         if args.repeat_notification_timeout == DEFAULT_REPEAT_NOTIFICATION_TIMEOUT {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the repeat_notification_timeout, using the config's repeat_notification_timeout. repeat_notification_timeout: {}", cfg.repeat_notification_timeout);
             args.repeat_notification_timeout = cfg.repeat_notification_timeout;
         }
         if args.aaa_mode_notification_body == DEFAULT_AAAMODE_NOTIFICATION_BODY {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the aaa_mode_notification_body, using the config's aaa_mode_notification_body. aaa_mode_notification_body: {}", cfg.aaa_mode_notification_body);
             args.aaa_mode_notification_body = cfg.aaa_mode_notification_body;
         }
         if args.aaa_mode_notification_summary == DEFAULT_AAAMODE_NOTIFICATION_SUMMARY {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the aaa_mode_notification_summary, using the config's aaa_mode_notification_summary. aaa_mode_notification_summary: {}", cfg.aaa_mode_notification_summary);
             args.aaa_mode_notification_summary = cfg.aaa_mode_notification_summary;
         }
         if args.aaa_mode_notification_timeout == DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT {
+            #[cfg(feature = "debug")]
+            debug!("The user not override the aaa_mode_notification_timeout, using the config's aaa_mode_notification_timeout. aaa_mode_notification_timeout: {}", cfg.aaa_mode_notification_timeout);
             args.aaa_mode_notification_timeout = cfg.aaa_mode_notification_timeout;
         }
+
+        #[cfg(feature = "debug")]
+        info!("The final settings: {:?}", args);
 
         args
     }

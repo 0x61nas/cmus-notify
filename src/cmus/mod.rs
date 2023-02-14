@@ -4,10 +4,12 @@ pub mod query;
 
 use crate::cmus::query::CmusQueryResponse;
 use std::collections::HashMap;
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 use std::num::ParseIntError;
 use std::str::FromStr;
 use typed_builder::TypedBuilder;
+#[cfg(feature = "debug")]
+use log::{info, debug};
 
 #[derive(Debug, PartialEq, Default)]
 pub struct TrackMetadata {
@@ -82,6 +84,9 @@ impl FromStr for Track {
     /// The first line is the status, the second is the path, the third is the duration, and the fourth is the position.
     /// The rest of the lines are tags, and the player settings, so we'll send them to `TrackMetadata::parse`, to get the tags.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        #[cfg(feature = "debug")]
+        info!("Parsing track from string: {}", s);
+
         let mut lines = s.lines();
 
         Ok(Track::builder()
@@ -132,15 +137,22 @@ impl TrackMetadata {
     /// This function will assume you processed the first 4 lines, and remove them from the iterator.
     ///
     /// and also assume the all tags is contained in the iterator.
-    fn parse<'a>(mut lines: impl Iterator<Item = &'a str>) -> Self {
+    fn parse<'a>(mut lines: impl Iterator<Item = &'a str> + Debug) -> Self {
+        #[cfg(feature = "debug")]
+        info!("Parsing track metadata from lines: {:?}", lines);
+
         let mut tags = HashMap::new();
 
         while let Some(line) = lines.next() {
+            #[cfg(feature = "debug")]
+            debug!("Parsing line: {}", line);
             match line.trim().split_once(' ') {
                 Some(("tag", rest)) => {
                     let Some((key, value)) = rest.split_once(' ') else {
                         continue; // Ignore lines that don't have a key and a value.
                     };
+                    #[cfg(feature = "debug")]
+                    debug!("Inserting tag: {} = {}", key, value);
                     tags.insert(key.to_string(), value.to_string());
                 }
                 _ => break, // We've reached the end of the tags.

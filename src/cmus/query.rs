@@ -52,6 +52,8 @@ impl CmusQueryResponse {
         if track != other_track {
             if track.status != other_track.status {
                 events.push(CmusEvent::StatusChanged(other_track.status));
+            } else if track.position != other_track.position {
+                events.push(CmusEvent::PositionChanged(other_track.position));
             } else {
                 events.push(CmusEvent::TrackChanged(other_track));
             }

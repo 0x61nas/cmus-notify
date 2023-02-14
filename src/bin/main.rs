@@ -46,7 +46,7 @@ fn main() {
                 // Update the previous response.
                 previous_response = response;
 
-                notification::show_notification(events, &settings, &mut previous_cover);
+                notification::show_notification(events, &settings, &mut previous_cover); // TODO: Handle the error.
             }
         }
         sleep!(settings.interval);

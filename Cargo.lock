@@ -227,6 +227,7 @@ dependencies = [
  "serde",
  "temp-file",
  "test-context",
+ "thiserror",
  "typed-builder",
 ]
 

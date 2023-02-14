@@ -3,13 +3,14 @@ pub mod player_settings;
 pub mod query;
 
 use crate::cmus::query::CmusQueryResponse;
-#[cfg(feature = "debug")]
-use log::{debug, info};
 use std::collections::HashMap;
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
 use std::num::ParseIntError;
 use std::str::FromStr;
+use thiserror::Error;
 use typed_builder::TypedBuilder;
+#[cfg(feature = "debug")]
+use log::{debug, info};
 
 #[derive(Debug, PartialEq, Default)]
 pub struct TrackMetadata {
@@ -33,33 +34,26 @@ pub struct Track {
     pub position: u32,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Error)]
 pub enum CmusError {
+    #[error("Cmus running error: {0}")]
     CmusRunningError(String),
+    #[error("Unknown status")]
     UnknownStatus,
+    #[error("No status")]
     NoStatus,
+    #[error("Empty path")]
     EmptyPath,
+    #[error("Duration error: {0}")]
     DurationError(String),
+    #[error("Position error: {0}")]
     PositionError(String),
+    #[error("Unknown error: {0}")]
     UnknownError(String),
+    #[error("Unknown AAA mode: {0}")]
     UnknownAAAMode(String),
+    #[error("Unknown shuffle mode: {0}")]
     UnknownShuffleMode(String),
-}
-
-impl Display for CmusError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CmusError::CmusRunningError(s) => write!(f, "Cmus running error: {}", s),
-            CmusError::UnknownStatus => write!(f, "Unknown status"),
-            CmusError::NoStatus => write!(f, "No status"),
-            CmusError::EmptyPath => write!(f, "Empty path"),
-            CmusError::DurationError(s) => write!(f, "Duration error: {}", s),
-            CmusError::PositionError(s) => write!(f, "Position error: {}", s),
-            CmusError::UnknownError(s) => write!(f, "Unknown error: {}", s),
-            CmusError::UnknownAAAMode(s) => write!(f, "Unknown AAA mode: {}", s),
-            CmusError::UnknownShuffleMode(s) => write!(f, "Unknown shuffle mode: {}", s),
-        }
-    }
 }
 
 impl FromStr for TrackStatus {

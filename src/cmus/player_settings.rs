@@ -1,8 +1,8 @@
 use crate::cmus::CmusError;
+#[cfg(feature = "debug")]
+use log::{debug, info};
 use std::num::ParseIntError;
 use std::str::FromStr;
-#[cfg(feature = "debug")]
-use log::{info, debug};
 
 #[derive(Debug, PartialEq)]
 pub struct PlayerSettings {

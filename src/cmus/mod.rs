@@ -3,13 +3,13 @@ pub mod player_settings;
 pub mod query;
 
 use crate::cmus::query::CmusQueryResponse;
+#[cfg(feature = "debug")]
+use log::{debug, info};
 use std::collections::HashMap;
 use std::fmt::{Debug, Display};
 use std::num::ParseIntError;
 use std::str::FromStr;
 use typed_builder::TypedBuilder;
-#[cfg(feature = "debug")]
-use log::{info, debug};
 
 #[derive(Debug, PartialEq, Default)]
 pub struct TrackMetadata {

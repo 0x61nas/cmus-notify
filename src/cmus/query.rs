@@ -1,9 +1,8 @@
 use crate::cmus::events::CmusEvent;
 use crate::cmus::player_settings::PlayerSettings;
 use crate::cmus::{CmusError, Track};
-use log::debug;
 #[cfg(feature = "debug")]
-use log::info;
+use log::{debug, info};
 use std::str::FromStr;
 
 /// This struct is used to store the row status response from cmus.
@@ -64,7 +63,11 @@ impl CmusQueryResponse {
             #[cfg(feature = "debug")]
             debug!("Track changed: {:?} -> {:?}", other_track, track);
 
-            if track.status != other_track.status {
+            if track.path != other_track.path {
+                #[cfg(feature = "debug")]
+                debug!("Track changed: {:?} -> {:?}", other_track, track);
+                events.push(CmusEvent::TrackChanged(other_track));
+            } else if track.status != other_track.status {
                 #[cfg(feature = "debug")]
                 debug!(
                     "Status changed: {:?} -> {:?}",
@@ -78,8 +81,6 @@ impl CmusQueryResponse {
                     other_track.position, track.position
                 );
                 events.push(CmusEvent::PositionChanged(other_track.position));
-            } else {
-                events.push(CmusEvent::TrackChanged(other_track)); // FIXME: if the track changed, and the status or possition changed, we should push the track changed event, not position or status changed.
             }
         }
 

@@ -487,3 +487,14 @@ impl Settings {
         args
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cli_arguments() {
+        use clap::CommandFactory;
+        Settings::command().debug_assert();
+    }
+}

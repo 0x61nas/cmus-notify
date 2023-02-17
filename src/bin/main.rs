@@ -1,8 +1,8 @@
 use cmus_notify::{
-    cmus::{self, query::CmusQueryResponse},
+    cmus::{self, events::CmusEvent, query::CmusQueryResponse},
     notification,
     settings::Settings,
-    TrackCover,
+    track_cover, TrackCover,
 };
 
 #[cfg(feature = "debug")]
@@ -80,11 +80,32 @@ fn main() {
                 // Update the previous response.
                 previous_response = response;
 
+                if events.len() == 1 {
+                    // If the track is changed, we need to update the cover.
+                    match &events[0] {
+                        CmusEvent::TrackChanged(track) => {
+                            previous_cover = track_cover(&track.path, settings.depth,
+                                                         settings.force_use_external_cover,
+                                                         settings.no_use_external_cover);
+                        }
+                        _ => {
+                            if previous_cover == TrackCover::None {
+                                // If the cover is not found, we need to update it.
+                                if let Ok(track) = &previous_response.track() {
+                                    previous_cover = track_cover(&track.path, settings.depth,
+                                                                 settings.force_use_external_cover,
+                                                                 settings.no_use_external_cover);
+                                }
+                            }
+                        }
+                    };
+                }
+
                 notification::show_notification(
                     events,
                     &settings,
                     &mut notification,
-                    &mut previous_cover,
+                    &previous_cover,
                 );
                 // TODO: Handle the error.
             }

@@ -3,14 +3,14 @@ use crate::cmus::{Track, TrackStatus};
 use crate::settings::Settings;
 use crate::{process_template_placeholders, track_cover, TrackCover};
 #[cfg(feature = "debug")]
-use log::{info,debug};
+use log::{debug, info};
 
 #[inline(always)]
 pub fn show_notification(
     events: Vec<CmusEvent>,
     settings: &Settings,
     notification: &mut notify_rust::Notification,
-    previous_cover: &mut TrackCover,
+    cover: &TrackCover,
 ) -> Result<(), notify_rust::error::Error> {
     if events.is_empty() {
         #[cfg(feature = "debug")]
@@ -19,16 +19,13 @@ pub fn show_notification(
     }
 
     // Set the image of the notification.
-    previous_cover.set_notification_image(notification);
+    cover.set_notification_image(notification);
 
     for event in events {
         #[cfg(feature = "debug")]
         info!("event: {:?}", event);
 
         match event {
-            CmusEvent::TrackChanged(track) => {
-                *previous_cover = track_cover(track.path.as_str(), settings.depth, settings.force_use_external_cover, settings.no_use_external_cover);
-            }
             CmusEvent::StatusChanged(track) => {
                 #[cfg(feature = "debug")]
                 debug!("Status changed: {:?}", track.status);

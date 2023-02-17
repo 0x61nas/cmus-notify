@@ -67,6 +67,8 @@ impl CmusQueryResponse {
                 #[cfg(feature = "debug")]
                 debug!("Track changed: {:?} -> {:?}", other_track, track);
                 events.push(CmusEvent::TrackChanged(other_track));
+                // We don't need to check for other changes, since the track changed.
+                return Ok(events);
             } else if track.status != other_track.status {
                 #[cfg(feature = "debug")]
                 debug!(

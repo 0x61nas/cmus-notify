@@ -104,7 +104,7 @@ pub fn search_for(
 }
 
 /// The cover of a track.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TrackCover {
     /// The cover is embedded in the track.
     /// The `TempFile` object contains the contents of the embedded picture.

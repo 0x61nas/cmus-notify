@@ -73,7 +73,7 @@ impl CmusQueryResponse {
                     "Status changed: {:?} -> {:?}",
                     other_track.status, track.status
                 );
-                events.push(CmusEvent::StatusChanged(other_track.status));
+                events.push(CmusEvent::StatusChanged(other_track.status, track));
             } else if track.position != other_track.position {
                 #[cfg(feature = "debug")]
                 debug!(

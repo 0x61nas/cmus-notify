@@ -3,7 +3,7 @@ use crate::cmus::{Track, TrackStatus};
 
 #[derive(Debug)]
 pub enum CmusEvent {
-    StatusChanged(TrackStatus),
+    StatusChanged(TrackStatus, Track),
     TrackChanged(Track),
     VolumeChanged { left: u8, right: u8 },
     PositionChanged(u32),

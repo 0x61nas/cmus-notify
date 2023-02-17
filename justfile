@@ -29,6 +29,7 @@ coverage:
 
 # Generate the coverage report
 coverage-report: coverage
+    # Generate the report in html format using grcov
     grcov . --binary-path ./target/debug/deps/ -s . -t html --branch --ignore-not-existing --ignore "../*" -o ./target/coverage/report/ --llvm --ignore "/*"
 
     # Open the report in the browser

@@ -71,13 +71,23 @@ pub fn search_for(
     max_depth: u8,
     regx: &regex::Regex,
 ) -> std::io::Result<Option<String>> {
+    let mut search_directory = if Path::new(search_directory).is_file() {
+        #[cfg(feature = "debug")]
+        {
+            info!("The provided search directory is a file, searching in the parent directory.");
+        }
+        let Some(parent) = Path::new(search_directory).parent() else { return Ok(None); };
+        let Some(parent) = parent.to_str() else { return Ok(None); };
+        parent
+    } else {
+        search_directory
+    };
     #[cfg(feature = "debug")]
     {
         info!("Searching for a file that matches the regular {regx:?} expression in \"{search_directory}\" and its subdirectories.");
         info!("Max depth: {max_depth}");
     }
     let mut max_depth = max_depth;
-    let mut search_directory = search_directory;
 
     loop {
         if let Some(path) = search(search_directory, regx)? {

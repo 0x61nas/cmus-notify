@@ -1,6 +1,7 @@
 #!/usr/bin/env just --justfile
 
 alias r := run
+alias h := show-help
 alias t := test
 alias l := lint
 alias c := check
@@ -22,6 +23,10 @@ lint:
 # Run the program with all features enabled and the debug profile
 run:
   RUST_BACKTRACE=1 RUST_LOG=debug cargo run --all-features
+
+# Run the program with all features enabled and use the `--help` flag
+show-help:
+  cargo run --all-features -- --help
 
 # Run the tests, and genrate a coverage report
 coverage:

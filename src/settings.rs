@@ -10,6 +10,9 @@ const NOTIFICATION_SUMMARY: &str = "{artist} - {title}";
 const NOTIFICATION_APP_NAME: &str = "C* Music Player";
 const DEFAULT_MAX_DEPTH: u8 = 3;
 const DEFAULT_INTERVAL_TIME: u64 = 1000; // 1000 ms
+const DEFAULT_STATUS_CHANGE_NOTIFICATION_BODY: &str = "<b>{status}</b>";
+const DEFAULT_STATUS_CHANGE_NOTIFICATION_SUMMARY: &str = "Status changed";
+const DEFAULT_STATUS_CHANGE_NOTIFICATION_TIMEOUT: u8 = 1;
 const DEFAULT_VOLUME_CHANGE_NOTIFICATION_BODY: &str = "Volume changed to {volume}%";
 const DEFAULT_VOLUME_CHANGE_NOTIFICATION_SUMMARY: &str = "Volume changed";
 const DEFAULT_VOLUME_CHANGE_NOTIFICATION_TIMEOUT: u8 = 1;
@@ -232,6 +235,19 @@ pub struct Settings {
     /// you can use the placeholders like "{lyrics}" in the summary, it will be replaced with the lyrics.
     #[arg(short = 'M', long, default_value = DEFAULT_LYRICS_NOTIFICATION_SUMMARY)]
     pub lyrics_notification_summary: String,
+    /// The status change notification body.
+    /// you can use the placeholders like "{status}" in the body, it will be replaced with the aaa mode.
+    ///
+    /// If you leave it empty, the notification will not be shown.
+    #[arg(short = 'O', long, default_value = DEFAULT_STATUS_CHANGE_NOTIFICATION_BODY)]
+    pub status_notification_body: String,
+    /// The status change notification summary.
+    /// you can use the placeholders like "{status}" in the summary, it will be replaced with the aaa mode.
+    #[arg(short = 'P', long, default_value = DEFAULT_STATUS_CHANGE_NOTIFICATION_SUMMARY)]
+    pub status_notification_summary: String,
+    /// The time out of the status change notification, in seconds.
+    #[arg(short = 'Q', long, default_value_t = DEFAULT_STATUS_CHANGE_NOTIFICATION_TIMEOUT)]
+    pub status_notification_timeout: u8,
 }
 
 impl Default for Settings {
@@ -242,6 +258,7 @@ impl Default for Settings {
             show_track_cover: true,
             notification_static_icon: None,
             cover_path: None,
+            #[cfg(feature = "lyrics")]
             lyrics_path: None,
             depth: DEFAULT_MAX_DEPTH,
             app_name: NOTIFICATION_APP_NAME.to_string(),
@@ -275,6 +292,9 @@ impl Default for Settings {
             lyrics_notification_body: DEFAULT_LYRICS_NOTIFICATION_BODY.to_string(),
             #[cfg(feature = "lyrics")]
             lyrics_notification_summary: DEFAULT_LYRICS_NOTIFICATION_SUMMARY.to_string(),
+            status_notification_body: DEFAULT_STATUS_CHANGE_NOTIFICATION_BODY.to_string(),
+            status_notification_summary: DEFAULT_STATUS_CHANGE_NOTIFICATION_SUMMARY.to_string(),
+            status_notification_timeout: DEFAULT_STATUS_CHANGE_NOTIFICATION_TIMEOUT,
         }
     }
 }
@@ -285,6 +305,7 @@ impl Settings {
     /// The args will override the config.
     /// If the config file is not found, create a new one, and use the default values.
     /// If the config file is found, but the config is invalid, use the default values.
+    #[inline(always)]
     pub fn load_config_and_parse_args() -> Self {
         #[cfg(feature = "debug")]
         info!("Loading config and parsing args...");

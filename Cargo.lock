@@ -219,13 +219,13 @@ dependencies = [
  "clap",
  "confy",
  "id3",
+ "image",
  "log",
  "lrc",
  "notify-rust",
  "pretty_env_logger",
  "regex",
  "serde",
- "temp-file",
  "test-context",
  "thiserror",
  "typed-builder",
@@ -1556,12 +1556,6 @@ dependencies = [
  "strum",
  "windows",
 ]
-
-[[package]]
-name = "temp-file"
-version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4479870ee948e4c5c3fc4774b46aa73eedf97d84503a9b90922c1bb19a73a8d"
 
 [[package]]
 name = "tempfile"

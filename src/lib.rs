@@ -34,12 +34,11 @@ pub mod settings;
 ///     Err(error) => println!("Error: {}", error),
 /// }
 /// ```
-pub fn get_embedded_art(track_path: &str) -> std::io::Result<Option<temp_file::TempFile>> {
+pub fn get_embedded_art(track_path: &str) -> std::io::Result<Option<image::DynamicImage>> {
     let tags = id3::Tag::read_from_path(track_path)
         .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
     let Some(picture) = tags.pictures().next() else { return Ok(None); };
-    let temp_file = temp_file::TempFile::new()?;
-    Ok(Some(temp_file.with_contents(&*picture.data).map_err(
+    Ok(Some(image::load_from_memory(&picture.data).map_err(
         |e| std::io::Error::new(std::io::ErrorKind::Other, e),
     )?))
 }
@@ -105,15 +104,39 @@ pub fn search_for(
 }
 
 /// The cover of a track.
+#[derive(Debug)]
 pub enum TrackCover {
     /// The cover is embedded in the track.
     /// The `TempFile` object contains the contents of the embedded picture.
-    Embedded(temp_file::TempFile),
+    Embedded(image::DynamicImage),
     /// The cover is an external file.
     /// The `String` contains the absolute path of the external file.
     External(String),
     /// The track does not have a cover.
     None,
+}
+
+impl TrackCover {
+    pub fn set_notification_image(&self, notification: &mut notify_rust::Notification) {
+        use TrackCover::*;
+        match self {
+            Embedded(cover) => {
+                #[cfg(feature = "debug")]
+                debug!("Setting the embedded cover as the notification image.");
+                let Ok(image) = notify_rust::Image::try_from(cover.clone()) else { return; };
+                notification.image_data(image);
+            }
+            External(cover_path) => {
+                #[cfg(feature = "debug")]
+                debug!("Setting the external cover as the notification image.");
+                let _ = notification.image(cover_path);
+            }
+            None => {
+                #[cfg(feature = "debug")]
+                debug!("The track does not have a cover.");
+            }
+        }
+    }
 }
 
 /// Returns the cover of a track.
@@ -172,7 +195,6 @@ fn search(search_directory: &str, matcher: &regex::Regex) -> std::io::Result<Opt
 }
 
 /// Replace all the placeholders in the template with their matching value.
-#[inline]
 pub fn process_template_placeholders(template: &String, track: &cmus::Track) -> String {
     #[cfg(feature = "debug")]
     {

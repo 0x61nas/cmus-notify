@@ -4,6 +4,7 @@ use cmus_notify::{
     settings::Settings,
     TrackCover,
 };
+
 #[cfg(feature = "debug")]
 extern crate pretty_env_logger;
 #[cfg(feature = "debug")]
@@ -12,6 +13,8 @@ extern crate log;
 
 macro_rules! sleep {
     ($time: expr) => {
+        #[cfg(feature = "debug")]
+        info!("sleeping for {} ms...", $time);
         std::thread::sleep(std::time::Duration::from_millis($time));
     };
 }
@@ -49,6 +52,8 @@ fn main() {
         info!("Query command built: {:?}", query_command);
     }
 
+    let mut notification = notify_rust::Notification::new();
+
     // Initialize the buffer to store the response from cmus, to compare it with the next one.
     let mut previous_response = CmusQueryResponse::default();
     // Initialize the buffer to store the cover path, to compare it with the next one.
@@ -63,9 +68,6 @@ fn main() {
                 std::process::exit(0)
             } else {
                 // If the track info is the same as the previous one, just sleep for a while and try again.
-                #[cfg(feature = "debug")] {
-                    info!("Cmus is not running, sleeping for {} ms...", settings.interval);
-                }
                 sleep!(settings.interval);
                 continue;
             }
@@ -78,7 +80,12 @@ fn main() {
                 // Update the previous response.
                 previous_response = response;
 
-                notification::show_notification(events, &settings, &mut previous_cover);
+                notification::show_notification(
+                    events,
+                    &settings,
+                    &mut notification,
+                    &mut previous_cover,
+                );
                 // TODO: Handle the error.
             }
         }

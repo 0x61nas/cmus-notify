@@ -30,7 +30,5 @@ features = ["yaml_conf"]
 lyrics = ["lrc"]
 debug = ["log", "pretty_env_logger"]
 
-default = ["lyrics", "debug"]
-
 [dev-dependencies]
 test-context = "0.1.4"

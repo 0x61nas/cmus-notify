@@ -59,7 +59,7 @@ fn main() {
     // Initialize the buffer to store the cover path, to compare it with the next one.
     // This is used to speed up the main loop, because we don't need to process the template and search for the cover every time.
     // We only need to do it when the track directory changes.
-    let mut previous_cover = TrackCover::None;
+    let mut cover = TrackCover::None;
 
     loop {
         // Get the response from cmus.
@@ -80,34 +80,45 @@ fn main() {
                 // Update the previous response.
                 previous_response = response;
 
+                //FIXME: Should check if the user has enabled the cover feature or use a static cover.
                 if events.len() == 1 {
                     // If the track is changed, we need to update the cover.
+                    let mut cover_changed = false;
                     match &events[0] {
                         CmusEvent::TrackChanged(track) => {
-                            previous_cover = track_cover(&track.path, settings.depth,
+                            cover = track_cover(&track.path, settings.depth,
                                                          settings.force_use_external_cover,
                                                          settings.no_use_external_cover);
+                            cover_changed = true;
                         }
                         _ => {
-                            if previous_cover == TrackCover::None {
+                            if cover == TrackCover::None {
                                 // If the cover is not found, we need to update it.
                                 if let Ok(track) = &previous_response.track() {
-                                    previous_cover = track_cover(&track.path, settings.depth,
+                                    cover = track_cover(&track.path, settings.depth,
                                                                  settings.force_use_external_cover,
                                                                  settings.no_use_external_cover);
+                                    cover_changed = true;
                                 }
                             }
                         }
                     };
+                    // Set the notification cover.
+                    if cover_changed {
+                        cover.set_notification_image(&mut notification);
+                    }
                 }
 
-                notification::show_notification(
+                match notification::show_notification(
                     events,
                     &settings,
                     &mut notification,
-                    &previous_cover,
-                );
-                // TODO: Handle the error.
+                ) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        eprintln!("Error: {}", e);
+                    }
+                }
             }
         }
         sleep!(settings.interval);

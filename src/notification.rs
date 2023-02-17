@@ -10,16 +10,12 @@ pub fn show_notification(
     events: Vec<CmusEvent>,
     settings: &Settings,
     notification: &mut notify_rust::Notification,
-    cover: &TrackCover,
 ) -> Result<(), notify_rust::error::Error> {
     if events.is_empty() {
         #[cfg(feature = "debug")]
         info!("no events to process");
         return Ok(()); // No events to process.
     }
-
-    // Set the image of the notification.
-    cover.set_notification_image(notification);
 
     for event in events {
         #[cfg(feature = "debug")]
@@ -29,12 +25,15 @@ pub fn show_notification(
             CmusEvent::StatusChanged(track) => {
                 #[cfg(feature = "debug")]
                 debug!("Status changed: {:?}", track.status);
-                build_status_notification(track, settings, notification)?;
+                build_status_notification(track, settings, notification);
                 notification.show()?;
             }
-            /*            CmusEvent::TrackChanged(track) => {
-                            bulid_track_notification(track, settings, notification, previous_cover)?
-                        }
+            CmusEvent::TrackChanged(track) => {
+                #[cfg(feature = "debug")]
+                debug!("Track changed: {:?}", track);
+                build_track_notification(track, settings, notification)?
+            }
+            /*
                         CmusEvent::VolumeChanged { left, right } if settings.show_player_notifications => {
                             build_volume_notification(left, right, settings, notification)?
                         }
@@ -60,12 +59,32 @@ fn build_status_notification(
     track: Track,
     settings: &Settings,
     notification: &mut notify_rust::Notification,
-) -> Result<(), notify_rust::error::Error> {
+) {
     // Set the summary and body of the notification.
     notification
         .summary(
             process_template_placeholders(&settings.status_notification_summary, &track).as_str(),
         )
-        .body(process_template_placeholders(&settings.status_notification_body, &track).as_str());
+        .body(process_template_placeholders(&settings.status_notification_body, &track).as_str())
+        .timeout(settings.status_notification_timeout as i32 * 1000);
+}
+
+#[inline(always)]
+fn build_track_notification(
+    track: Track,
+    settings: &Settings,
+    notification: &mut notify_rust::Notification,
+) -> Result<(), notify_rust::error::Error> {
+    // Set the summary and body of the notification.
+    notification
+        .summary(
+            process_template_placeholders(&settings.summary, &track).as_str(),
+        )
+        .body(process_template_placeholders(&settings.body, &track).as_str())
+        .timeout(settings.timeout as i32 * 1000);
+
+    notification.hint(notify_rust::Hint::Category("music".to_string()));
+    notification.show()?;
+
     Ok(())
 }

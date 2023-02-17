@@ -39,3 +39,6 @@ coverage-report: coverage
 
     # Open the report in the browser
     xdg-open ./target/coverage/report/index.html
+
+remove-config:
+  rm -rf ~/.config/cmus-notify/

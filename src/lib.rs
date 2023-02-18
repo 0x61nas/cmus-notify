@@ -160,13 +160,13 @@ pub fn track_cover(
     force_use_external_cover: bool,
     no_use_external_cover: bool,
 ) -> TrackCover {
-    if !force_use_external_cover {
+    /*if !force_use_external_cover {
         #[cfg(feature = "debug")]
         info!("Trying to get the embedded cover of \"{track_path}\".");
         if let Ok(Some(cover)) = get_embedded_art(track_path) {
             return TrackCover::Embedded(cover);
         }
-    }
+    }*/
 
     if !no_use_external_cover {
         #[cfg(feature = "debug")]

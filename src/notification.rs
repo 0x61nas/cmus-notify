@@ -77,9 +77,7 @@ fn build_track_notification(
 ) -> Result<(), notify_rust::error::Error> {
     // Set the summary and body of the notification.
     notification
-        .summary(
-            process_template_placeholders(&settings.summary, &track).as_str(),
-        )
+        .summary(process_template_placeholders(&settings.summary, &track).as_str())
         .body(process_template_placeholders(&settings.body, &track).as_str())
         .timeout(settings.timeout as i32 * 1000);
 

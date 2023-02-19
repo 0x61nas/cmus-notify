@@ -48,9 +48,7 @@ fn main() {
         &settings.cmus_socket_password,
     );
     #[cfg(feature = "debug")]
-    {
-        info!("Query command built: {:?}", query_command);
-    }
+    info!("Query command built: {:?}", query_command);
 
     let mut notification = notify_rust::Notification::new();
 
@@ -86,18 +84,24 @@ fn main() {
                     let mut cover_changed = false;
                     match &events[0] {
                         CmusEvent::TrackChanged(track) => {
-                            cover = track_cover(&track.path, settings.depth,
-                                                         settings.force_use_external_cover,
-                                                         settings.no_use_external_cover);
+                            cover = track_cover(
+                                &track.path,
+                                settings.depth,
+                                settings.force_use_external_cover,
+                                settings.no_use_external_cover,
+                            );
                             cover_changed = true;
                         }
                         _ => {
                             if cover == TrackCover::None {
                                 // If the cover is not found, we need to update it.
                                 if let Ok(track) = &previous_response.track() {
-                                    cover = track_cover(&track.path, settings.depth,
-                                                                 settings.force_use_external_cover,
-                                                                 settings.no_use_external_cover);
+                                    cover = track_cover(
+                                        &track.path,
+                                        settings.depth,
+                                        settings.force_use_external_cover,
+                                        settings.no_use_external_cover,
+                                    );
                                     cover_changed = true;
                                 }
                             }
@@ -110,11 +114,7 @@ fn main() {
                     }
                 }
 
-                match notification::show_notification(
-                    events,
-                    &settings,
-                    &mut notification,
-                ) {
+                match notification::show_notification(events, &settings, &mut notification) {
                     Ok(_) => {}
                     Err(e) => {
                         eprintln!("Error: {}", e);

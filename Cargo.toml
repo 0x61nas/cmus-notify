@@ -32,3 +32,4 @@ debug = ["log", "pretty_env_logger"]
 
 [dev-dependencies]
 test-context = "0.1.4"
+clap-markdown = "0.1.3"

@@ -105,6 +105,7 @@ fn main() {
                     };
                     // Set the notification cover.
                     if cover_changed {
+                        notification = notify_rust::Notification::new(); // Reset the notification.
                         cover.set_notification_image(&mut notification);
                     }
                 }

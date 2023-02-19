@@ -121,7 +121,7 @@ pub enum TrackCover {
     Embedded(image::DynamicImage),
     /// The cover is an external file.
     /// The `String` contains the absolute path of the external file.
-    External(String),
+    External(image::DynamicImage),
     /// The track does not have a cover.
     None,
 }
@@ -130,20 +130,17 @@ impl TrackCover {
     pub fn set_notification_image(&self, notification: &mut notify_rust::Notification) {
         use TrackCover::*;
         match self {
-            Embedded(cover) => {
+            Embedded(cover) | External(cover) => {
                 #[cfg(feature = "debug")]
-                debug!("Setting the embedded cover as the notification image.");
+                debug!("Setting the cover as the notification image.");
                 let Ok(image) = notify_rust::Image::try_from(cover.clone()) else { return; };
                 notification.image_data(image);
-            }
-            External(cover_path) => {
-                #[cfg(feature = "debug")]
-                debug!("Setting the external cover as the notification image.");
-                let _ = notification.image(cover_path);
             }
             None => {
                 #[cfg(feature = "debug")]
                 debug!("The track does not have a cover.");
+                // reset the notification image
+                notification.image_path("");
             }
         }
     }
@@ -160,13 +157,13 @@ pub fn track_cover(
     force_use_external_cover: bool,
     no_use_external_cover: bool,
 ) -> TrackCover {
-    /*if !force_use_external_cover {
+    if !force_use_external_cover {
         #[cfg(feature = "debug")]
         info!("Trying to get the embedded cover of \"{track_path}\".");
         if let Ok(Some(cover)) = get_embedded_art(track_path) {
             return TrackCover::Embedded(cover);
         }
-    }*/
+    }
 
     if !no_use_external_cover {
         #[cfg(feature = "debug")]
@@ -176,6 +173,13 @@ pub fn track_cover(
             max_depth,
             &regex::Regex::new(r".*\.(jpg|jpeg|png|gif)$").unwrap(),
         ) {
+            #[cfg(feature = "debug")]
+            info!("Found the external cover \"{cover}\".");
+            let Ok(cover) = image::open(cover) else {
+                #[cfg(feature = "debug")]
+                info!("Could not open the external cover.");
+                return TrackCover::None;
+            };
             return TrackCover::External(cover);
         }
     }

@@ -51,13 +51,15 @@ impl CmusQueryResponse {
         if self.track_row.is_empty() || self.player_settings_row.is_empty() {
             #[cfg(feature = "debug")]
             info!("Cmus response is empty, returning empty events");
-            return Err(CmusError::NoEvents)
+            return Ok(Vec::new())
         }
 
         let mut events = Vec::new();
 
         let track = self.track()?;
         let other_track = other.track()?;
+
+        let other_player_settings = other.player_settings()?;
 
         if track != other_track {
             #[cfg(feature = "debug")]
@@ -66,7 +68,10 @@ impl CmusQueryResponse {
             if track.path != other_track.path {
                 #[cfg(feature = "debug")]
                 debug!("Track changed: {:?} -> {:?}", other_track, track);
-                events.push(CmusEvent::TrackChanged(other_track));
+                events.push(CmusEvent::TrackChanged(
+                    other_track.clone(),
+                    other_player_settings.clone(),
+                ));
                 // We don't need to check for other changes, since the track changed.
                 return Ok(events);
             } else if track.status != other_track.status {
@@ -75,19 +80,24 @@ impl CmusQueryResponse {
                     "Status changed: {:?} -> {:?}",
                     other_track.status, track.status
                 );
-                events.push(CmusEvent::StatusChanged(track));
+                events.push(CmusEvent::StatusChanged(
+                    track.clone(),
+                    other_player_settings.clone(),
+                ));
             } else if track.position != other_track.position {
                 #[cfg(feature = "debug")]
                 debug!(
                     "Position changed: {:?} -> {:?}",
                     other_track.position, track.position
                 );
-                events.push(CmusEvent::PositionChanged(other_track.position));
+                events.push(CmusEvent::PositionChanged(
+                    track.clone(),
+                    other_player_settings.clone(),
+                ));
             }
         }
 
         let player_settings = self.player_settings()?;
-        let other_player_settings = other.player_settings()?;
 
         if player_settings != other_player_settings {
             #[cfg(feature = "debug")]
@@ -103,7 +113,10 @@ impl CmusQueryResponse {
                     other_player_settings.shuffle, player_settings.shuffle
                 );
 
-                events.push(CmusEvent::ShuffleChanged(player_settings.shuffle));
+                events.push(CmusEvent::ShuffleChanged(
+                    other_track.clone(),
+                    other_player_settings.clone(),
+                ));
             }
 
             if player_settings.repeat != other_player_settings.repeat {
@@ -113,7 +126,10 @@ impl CmusQueryResponse {
                     other_player_settings.repeat, player_settings.repeat
                 );
 
-                events.push(CmusEvent::RepeatChanged(player_settings.repeat));
+                events.push(CmusEvent::RepeatChanged(
+                    other_track.clone(),
+                    other_player_settings.clone(),
+                ));
             }
 
             if player_settings.aaa_mode != other_player_settings.aaa_mode {
@@ -123,7 +139,10 @@ impl CmusQueryResponse {
                     other_player_settings.aaa_mode, player_settings.aaa_mode
                 );
 
-                events.push(CmusEvent::AAAMode(player_settings.aaa_mode));
+                events.push(CmusEvent::AAAMode(
+                    other_track.clone(),
+                    other_player_settings.clone(),
+                ));
             }
 
             if player_settings.volume != other_player_settings.volume {
@@ -133,10 +152,7 @@ impl CmusQueryResponse {
                     other_player_settings.volume, player_settings.volume
                 );
 
-                events.push(CmusEvent::VolumeChanged {
-                    left: player_settings.volume.left,
-                    right: player_settings.volume.right,
-                });
+                events.push(CmusEvent::VolumeChanged(other_track, other_player_settings));
             }
         }
 

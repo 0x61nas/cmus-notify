@@ -1,4 +1,5 @@
 use crate::cmus::events::CmusEvent;
+use crate::cmus::player_settings::PlayerSettings;
 use crate::cmus::query::CmusQueryResponse;
 use crate::cmus::{Track, TrackStatus};
 use crate::settings::Settings;
@@ -6,6 +7,12 @@ use crate::{process_template_placeholders, track_cover, TrackCover};
 #[cfg(feature = "debug")]
 use log::{debug, info};
 use notify_rust::Notification;
+
+enum Action {
+    Show,
+    Update,
+    None,
+}
 
 pub struct NotificationsHandler {
     cover_set: bool,
@@ -33,26 +40,29 @@ impl NotificationsHandler {
         //FIXME: Should check if the user has enabled the cover feature or use a static cover.
         self.update_cover(&events[0], response);
 
+        let mut action = Action::None;
+
         for event in events {
             #[cfg(feature = "debug")]
             info!("event: {:?}", event);
 
             match event {
-                CmusEvent::StatusChanged(track) => {
+                CmusEvent::StatusChanged(track, player_settings) => {
                     #[cfg(feature = "debug")]
                     debug!("Status changed: {:?}", track.status);
-                    self.build_status_notification(track);
-                    self.notification.show()?;
+                    action = self.build_status_notification(track, player_settings);
                 }
-                CmusEvent::TrackChanged(track) => {
+                CmusEvent::TrackChanged(track, player_settings) => {
                     #[cfg(feature = "debug")]
                     debug!("Track changed: {:?}", track);
-                    self.build_track_notification(track)?
+                    action = self.build_track_notification(track, player_settings);
                 }
+                CmusEvent::VolumeChanged(track, player_settings)
+                if self.settings.show_player_notifications =>
+                    {
+                        action = self.build_volume_notification(track, player_settings);
+                    }
                 /*
-                            CmusEvent::VolumeChanged { left, right } if settings.show_player_notifications => {
-                                build_volume_notification(left, right, settings, notification)?
-                            }
                             CmusEvent::PositionChanged(position) => todo!(),
                             CmusEvent::ShuffleChanged(shuffle) if settings.show_player_notifications => {
                                 build_shuffle_notification(shuffle, settings, notification)?
@@ -66,12 +76,26 @@ impl NotificationsHandler {
                 */
                 _ => {}
             }
+
+            match action {
+                Action::Show => {
+                    let _ = self.notification.show()?;
+                }
+                Action::None => {}
+                _ => todo!(),
+            };
         }
+
+
         Ok(())
     }
 
     #[inline(always)]
-    fn build_status_notification(&mut self, track: Track) {
+    fn build_status_notification(
+        &mut self,
+        track: Track,
+        player_settings: PlayerSettings,
+    ) -> Action {
         // Set the summary and body of the notification.
         self.notification
             .summary(
@@ -83,25 +107,47 @@ impl NotificationsHandler {
                     .as_str(),
             )
             .timeout(self.settings.status_notification_timeout as i32 * 1000);
+        Action::Show
     }
 
     #[inline(always)]
-    fn build_track_notification(&mut self, track: Track) -> Result<(), notify_rust::error::Error> {
+    fn build_track_notification(
+        &mut self,
+        track: Track,
+        player_settings: PlayerSettings,
+    ) -> Action {
         // Set the summary and body of the notification.
         self.notification
             .summary(process_template_placeholders(&self.settings.summary, &track).as_str())
             .body(process_template_placeholders(&self.settings.body, &track).as_str());
 
-        let n = self.notification.show()?;
+        Action::Show
+    }
 
-        Ok(())
+    #[inline(always)]
+    fn build_volume_notification(
+        &mut self,
+        track: Track,
+        player_settings: PlayerSettings,
+    ) -> Action {
+        self.notification
+            .summary(
+                process_template_placeholders(&self.settings.volume_notification_summary, &track)
+                    .as_str(),
+            )
+            .body(
+                process_template_placeholders(&self.settings.volume_notification_body, &track)
+                    .as_str(),
+            );
+
+        Action::Show
     }
 
     #[inline(always)]
     fn update_cover(&mut self, first_event: &CmusEvent, response: &CmusQueryResponse) {
         // If the track is changed, we need to update the cover.
         match first_event {
-            CmusEvent::TrackChanged(track) => {
+            CmusEvent::TrackChanged(track, _) => {
                 self.set_cover(track);
             }
             _ => {
@@ -133,7 +179,7 @@ impl NotificationsHandler {
             self.settings.force_use_external_cover,
             self.settings.no_use_external_cover,
         )
-        .set_notification_image(&mut self.notification);
+            .set_notification_image(&mut self.notification);
         // Flip the change flag
         self.cover_set = true;
     }

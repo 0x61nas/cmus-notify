@@ -4,7 +4,7 @@ use log::{debug, info};
 use std::num::ParseIntError;
 use std::str::FromStr;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct PlayerSettings {
     pub repeat: bool,
     pub repeat_current: bool,
@@ -13,7 +13,7 @@ pub struct PlayerSettings {
     pub volume: Volume,
 }
 
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug, PartialEq, Default, Clone)]
 pub enum Shuffle {
     #[default]
     Off,
@@ -21,13 +21,13 @@ pub enum Shuffle {
     Albums,
 }
 
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug, PartialEq, Default, Clone)]
 pub struct Volume {
     pub left: u8,
     pub right: u8,
 }
 
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug, PartialEq, Default, Clone)]
 pub enum AAAMode {
     #[default]
     All,

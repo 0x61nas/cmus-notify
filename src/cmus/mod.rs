@@ -12,12 +12,12 @@ use std::str::FromStr;
 use thiserror::Error;
 use typed_builder::TypedBuilder;
 
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug, PartialEq, Default, Clone)]
 pub struct TrackMetadata {
     tags: HashMap<String, String>,
 }
 
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug, PartialEq, Default, Clone)]
 pub enum TrackStatus {
     Playing,
     Paused,
@@ -25,7 +25,7 @@ pub enum TrackStatus {
     Stopped,
 }
 
-#[derive(Debug, TypedBuilder, PartialEq, Default)]
+#[derive(Debug, TypedBuilder, PartialEq, Default, Clone)]
 pub struct Track {
     pub status: TrackStatus,
     pub path: String,

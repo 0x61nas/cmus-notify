@@ -77,10 +77,12 @@ fn main() {
                 // Update the previous response.
                 previous_response = response;
 
-                match notifications_handler.show_notification(events, &previous_response) {
-                    Ok(_) => {}
-                    Err(e) => {
-                        eprintln!("Error: {}", e);
+                if !events.is_empty() {
+                    match notifications_handler.show_notification(events, &previous_response) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            eprintln!("Error: {}", e);
+                        }
                     }
                 }
             }

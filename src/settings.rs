@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 const NOTIFICATION_TIMEOUT: u8 = 5;
 const NOTIFICATION_BODY: &str =
     "<b>Playing:</b> {title} \n <b>album:</b> {album} \n <b>Artist:</b> {artist} - {year}";
-const NOTIFICATION_SUMMARY: &str = "{artist} - {title}";
+const NOTIFICATION_SUMMARY: &str = "{title}";
 const NOTIFICATION_APP_NAME: &str = "C* Music Player";
 const DEFAULT_MAX_DEPTH: u8 = 3;
 const DEFAULT_INTERVAL_TIME: u64 = 1000; // 1000 ms

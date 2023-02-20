@@ -12,6 +12,10 @@ use std::str::FromStr;
 use thiserror::Error;
 use typed_builder::TypedBuilder;
 
+pub trait TemplateProcessor {
+    fn process(&self, template: &String) -> String;
+}
+
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct TrackMetadata {
     tags: HashMap<String, String>,
@@ -56,6 +60,44 @@ pub enum CmusError {
     UnknownShuffleMode(String),
     #[error("No events")]
     NoEvents,
+}
+
+impl TemplateProcessor for Track {
+    fn process(&self, template: &String) -> String {
+        #[cfg(feature = "debug")]
+        {
+            info!("Processing the template placeholders.");
+            debug!("Template: {template}");
+            debug!("Track: {self:?}");
+        }
+        let mut processed = template.clone();
+
+        let mut key = String::new(); // Just a buffer to store the key.
+
+        for c in template.chars() {
+            if c == '{' {
+                key = String::new();
+            } else if c == '}' {
+                #[cfg(feature = "debug")]
+                debug!("Replacing the placeholder {{{key}}} with its matching value.");
+                // Replace the key with their matching value if exists, if not replace with the empty string.
+                processed = processed.replace(
+                    &format!("{{{}}}", key),
+                    match key.as_str() {
+                        "title" => self.get_name(),
+                        _ => self.metadata.get(&key).unwrap_or(""),
+                    },
+                );
+            } else {
+                key.push(c);
+            }
+        }
+
+        #[cfg(feature = "debug")]
+        debug!("Processed template: {processed}");
+
+        processed
+    }
 }
 
 impl FromStr for TrackStatus {

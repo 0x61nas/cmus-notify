@@ -3,6 +3,7 @@
 #[cfg(feature = "debug")]
 use log::{debug, info};
 use std::path::Path;
+use crate::cmus::TemplateProcessor;
 
 pub mod cmus;
 pub mod notification;
@@ -209,44 +210,14 @@ fn search(search_directory: &str, matcher: &regex::Regex) -> std::io::Result<Opt
 }
 
 /// Replace all the placeholders in the template with their matching value.
+#[inline(always)]
 pub fn process_template_placeholders(
     template: &String,
     track: &cmus::Track,
     player_settings: &cmus::player_settings::PlayerSettings,
 ) -> String {
-    #[cfg(feature = "debug")]
-    {
-        info!("Processing the template placeholders.");
-        debug!("Template: {template}");
-        debug!("Track: {track:?}");
-    }
-    let mut processed = template.clone();
-
-    let mut key = String::new(); // Just a buffer to store the key.
-
-    for c in template.chars() {
-        if c == '{' {
-            key = String::new();
-        } else if c == '}' {
-            #[cfg(feature = "debug")]
-            debug!("Replacing the placeholder {{{key}}} with its matching value.");
-            // Replace the key with their matching value if exists, if not replace with the empty string.
-            processed = processed.replace(
-                &format!("{{{}}}", key),
-                match key.as_str() {
-                    "title" => track.get_name(),
-                    _ => track.metadata.get(&key).unwrap_or(""),
-                },
-            );
-        } else {
-            key.push(c);
-        }
-    }
-
-    #[cfg(feature = "debug")]
-    debug!("Processed template: {processed}");
-
-    processed
+    let res = track.process(template);
+    player_settings.process(&res)
 }
 
 #[cfg(test)]

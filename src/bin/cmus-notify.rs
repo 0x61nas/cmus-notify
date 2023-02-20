@@ -50,7 +50,10 @@ fn main() {
     #[cfg(feature = "debug")]
     info!("Query command built: {:?}", query_command);
 
-    let mut notification = notify_rust::Notification::new();
+    let interval = settings.interval;
+    let link = settings.link;
+
+    let mut notifications_handler = notification::NotificationsHandler::new(settings);
 
     // Initialize the buffer to store the response from cmus, to compare it with the next one.
     let mut previous_response = CmusQueryResponse::default();
@@ -58,11 +61,11 @@ fn main() {
     loop {
         // Get the response from cmus.
         let Ok(response) = cmus::ping_cmus(&mut query_command) else {
-            if settings.link {
+            if link {
                 std::process::exit(0)
             } else {
                 // If the track info is the same as the previous one, just sleep for a while and try again.
-                sleep!(settings.interval);
+                sleep!(interval);
                 continue;
             }
         };
@@ -74,8 +77,7 @@ fn main() {
                 // Update the previous response.
                 previous_response = response;
 
-
-                match notification::show_notification(events, &settings, &mut notification, &previous_response) {
+                match notifications_handler.show_notification(events, &previous_response) {
                     Ok(_) => {}
                     Err(e) => {
                         eprintln!("Error: {}", e);
@@ -83,6 +85,6 @@ fn main() {
                 }
             }
         }
-        sleep!(settings.interval);
+        sleep!(interval);
     }
 }

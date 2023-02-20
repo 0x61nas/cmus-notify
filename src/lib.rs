@@ -209,7 +209,11 @@ fn search(search_directory: &str, matcher: &regex::Regex) -> std::io::Result<Opt
 }
 
 /// Replace all the placeholders in the template with their matching value.
-pub fn process_template_placeholders(template: &String, track: &cmus::Track) -> String {
+pub fn process_template_placeholders(
+    template: &String,
+    track: &cmus::Track,
+    player_settings: &cmus::player_settings::PlayerSettings,
+) -> String {
     #[cfg(feature = "debug")]
     {
         info!("Processing the template placeholders.");

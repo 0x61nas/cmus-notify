@@ -51,7 +51,7 @@ impl CmusQueryResponse {
         if self.track_row.is_empty() || self.player_settings_row.is_empty() {
             #[cfg(feature = "debug")]
             info!("Cmus response is empty, returning empty events");
-            return Ok(Vec::new())
+            return Ok(Vec::new());
         }
 
         let mut events = Vec::new();

@@ -8,10 +8,23 @@ use crate::{process_template_placeholders, track_cover, TrackCover};
 use log::{debug, info};
 use notify_rust::Notification;
 
-enum Action {
+pub enum Action {
     Show,
     Update,
     None,
+}
+
+impl Action {
+    pub fn max(self, other: Self) -> Self {
+        match (self, other) {
+            (Action::Show, Action::Show) => Action::Show,
+            (Action::Show, Action::Update) | (Action::Update, Action::Show | Action::Update) => {
+                Action::Update
+            }
+            (Action::None, _) => Action::None,
+            (_, Action::None) => Action::None,
+        }
+    }
 }
 
 pub struct NotificationsHandler {
@@ -46,36 +59,7 @@ impl NotificationsHandler {
             #[cfg(feature = "debug")]
             info!("event: {:?}", event);
 
-            match event {
-                CmusEvent::StatusChanged(track, player_settings) => {
-                    #[cfg(feature = "debug")]
-                    debug!("Status changed: {:?}", track.status);
-                    action = self.build_status_notification(track, player_settings);
-                }
-                CmusEvent::TrackChanged(track, player_settings) => {
-                    #[cfg(feature = "debug")]
-                    debug!("Track changed: {:?}", track);
-                    action = self.build_track_notification(track, player_settings);
-                }
-                CmusEvent::VolumeChanged(track, player_settings)
-                if self.settings.show_player_notifications =>
-                    {
-                        action = self.build_volume_notification(track, player_settings);
-                    }
-                /*
-                            CmusEvent::PositionChanged(position) => todo!(),
-                            CmusEvent::ShuffleChanged(shuffle) if settings.show_player_notifications => {
-                                build_shuffle_notification(shuffle, settings, notification)?
-                            }
-                            CmusEvent::RepeatChanged(repeat) if settings.show_player_notifications => {
-                                build_repeat_notification(repeat, settings, notification)?
-                            }
-                            CmusEvent::AAAMode(aaa_mode) if settings.show_player_notifications => {
-                                build_aaa_mode_notification(aaa_mode, settings, notification)?
-                            }
-                */
-                _ => {}
-            }
+            action = event.build_notification(&mut self.settings, &mut self.notification);
 
             match action {
                 Action::Show => {
@@ -86,61 +70,7 @@ impl NotificationsHandler {
             };
         }
 
-
         Ok(())
-    }
-
-    #[inline(always)]
-    fn build_status_notification(
-        &mut self,
-        track: Track,
-        player_settings: PlayerSettings,
-    ) -> Action {
-        // Set the summary and body of the notification.
-        self.notification
-            .summary(
-                process_template_placeholders(&self.settings.status_notification_summary, &track)
-                    .as_str(),
-            )
-            .body(
-                process_template_placeholders(&self.settings.status_notification_body, &track)
-                    .as_str(),
-            )
-            .timeout(self.settings.status_notification_timeout as i32 * 1000);
-        Action::Show
-    }
-
-    #[inline(always)]
-    fn build_track_notification(
-        &mut self,
-        track: Track,
-        player_settings: PlayerSettings,
-    ) -> Action {
-        // Set the summary and body of the notification.
-        self.notification
-            .summary(process_template_placeholders(&self.settings.summary, &track).as_str())
-            .body(process_template_placeholders(&self.settings.body, &track).as_str());
-
-        Action::Show
-    }
-
-    #[inline(always)]
-    fn build_volume_notification(
-        &mut self,
-        track: Track,
-        player_settings: PlayerSettings,
-    ) -> Action {
-        self.notification
-            .summary(
-                process_template_placeholders(&self.settings.volume_notification_summary, &track)
-                    .as_str(),
-            )
-            .body(
-                process_template_placeholders(&self.settings.volume_notification_body, &track)
-                    .as_str(),
-            );
-
-        Action::Show
     }
 
     #[inline(always)]
@@ -179,7 +109,7 @@ impl NotificationsHandler {
             self.settings.force_use_external_cover,
             self.settings.no_use_external_cover,
         )
-            .set_notification_image(&mut self.notification);
+        .set_notification_image(&mut self.notification);
         // Flip the change flag
         self.cover_set = true;
     }

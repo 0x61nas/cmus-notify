@@ -54,10 +54,6 @@ fn main() {
 
     // Initialize the buffer to store the response from cmus, to compare it with the next one.
     let mut previous_response = CmusQueryResponse::default();
-    // Initialize the buffer to store the cover path, to compare it with the next one.
-    // This is used to speed up the main loop, because we don't need to process the template and search for the cover every time.
-    // We only need to do it when the track directory changes.
-    let mut cover = TrackCover::None;
 
     loop {
         // Get the response from cmus.
@@ -78,43 +74,8 @@ fn main() {
                 // Update the previous response.
                 previous_response = response;
 
-                //FIXME: Should check if the user has enabled the cover feature or use a static cover.
-                if events.len() == 1 {
-                    // If the track is changed, we need to update the cover.
-                    let mut cover_changed = false;
-                    match &events[0] {
-                        CmusEvent::TrackChanged(track) => {
-                            cover = track_cover(
-                                &track.path,
-                                settings.depth,
-                                settings.force_use_external_cover,
-                                settings.no_use_external_cover,
-                            );
-                            cover_changed = true;
-                        }
-                        _ => {
-                            if cover == TrackCover::None {
-                                // If the cover is not found, we need to update it.
-                                if let Ok(track) = &previous_response.track() {
-                                    cover = track_cover(
-                                        &track.path,
-                                        settings.depth,
-                                        settings.force_use_external_cover,
-                                        settings.no_use_external_cover,
-                                    );
-                                    cover_changed = true;
-                                }
-                            }
-                        }
-                    };
-                    // Set the notification cover.
-                    if cover_changed {
-                        notification = notify_rust::Notification::new(); // Reset the notification.
-                        cover.set_notification_image(&mut notification);
-                    }
-                }
 
-                match notification::show_notification(events, &settings, &mut notification) {
+                match notification::show_notification(events, &settings, &mut notification, &previous_response) {
                     Ok(_) => {}
                     Err(e) => {
                         eprintln!("Error: {}", e);

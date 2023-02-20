@@ -54,6 +54,8 @@ pub enum CmusError {
     UnknownAAAMode(String),
     #[error("Unknown shuffle mode: {0}")]
     UnknownShuffleMode(String),
+    #[error("No events")]
+    NoEvents,
 }
 
 impl FromStr for TrackStatus {

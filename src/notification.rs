@@ -30,12 +30,6 @@ impl NotificationsHandler {
         events: Vec<CmusEvent>,
         response: &CmusQueryResponse,
     ) -> Result<(), notify_rust::error::Error> {
-        if events.is_empty() {
-            #[cfg(feature = "debug")]
-            info!("no events to process");
-            return Ok(()); // No events to process.
-        }
-
         //FIXME: Should check if the user has enabled the cover feature or use a static cover.
         self.update_cover(&events[0], response);
 

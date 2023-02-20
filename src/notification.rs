@@ -1,11 +1,11 @@
 use crate::cmus::events::CmusEvent;
+use crate::cmus::query::CmusQueryResponse;
 use crate::cmus::{Track, TrackStatus};
 use crate::settings::Settings;
 use crate::{process_template_placeholders, track_cover, TrackCover};
 #[cfg(feature = "debug")]
 use log::{debug, info};
 use notify_rust::Notification;
-use crate::cmus::query::CmusQueryResponse;
 
 pub struct NotificationsHandler {
     cover_set: bool,
@@ -24,6 +24,7 @@ impl NotificationsHandler {
         }
     }
 
+    #[inline]
     pub fn show_notification(
         &mut self,
         events: Vec<CmusEvent>,
@@ -80,9 +81,13 @@ impl NotificationsHandler {
         // Set the summary and body of the notification.
         self.notification
             .summary(
-                process_template_placeholders(&self.settings.status_notification_summary, &track).as_str(),
+                process_template_placeholders(&self.settings.status_notification_summary, &track)
+                    .as_str(),
             )
-            .body(process_template_placeholders(&self.settings.status_notification_body, &track).as_str())
+            .body(
+                process_template_placeholders(&self.settings.status_notification_body, &track)
+                    .as_str(),
+            )
             .timeout(self.settings.status_notification_timeout as i32 * 1000);
     }
 
@@ -114,13 +119,13 @@ impl NotificationsHandler {
                 }
             }
         };
-
     }
 
     fn set_cover(&mut self, track: &Track) {
         // Reset the notification
         self.notification = Notification::new();
-        self.notification.appname("cmus-notify")
+        self.notification
+            .appname("cmus-notify")
             .timeout(self.settings.timeout as i32 * 1000)
             .hint(notify_rust::Hint::Category("music".to_string()))
             .hint(notify_rust::Hint::DesktopEntry("cmus.desktop".to_string()))
@@ -132,9 +137,9 @@ impl NotificationsHandler {
             self.settings.depth,
             self.settings.force_use_external_cover,
             self.settings.no_use_external_cover,
-        ).set_notification_image(&mut self.notification);
+        )
+        .set_notification_image(&mut self.notification);
         // Flip the change flag
         self.cover_set = true;
     }
 }
-

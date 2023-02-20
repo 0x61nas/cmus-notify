@@ -115,6 +115,7 @@ impl NotificationsHandler {
         };
     }
 
+    #[inline]
     fn set_cover(&mut self, track: &Track) {
         // Reset the notification
         self.notification = Notification::new();

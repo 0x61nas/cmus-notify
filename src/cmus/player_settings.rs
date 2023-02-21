@@ -1,6 +1,8 @@
-use crate::cmus::CmusError;
+use crate::cmus::{CmusError, TemplateProcessor};
 #[cfg(feature = "debug")]
 use log::{debug, info};
+use parse_display::Display;
+use std::fmt::{Display, Formatter};
 use std::num::ParseIntError;
 use std::str::FromStr;
 
@@ -13,7 +15,7 @@ pub struct PlayerSettings {
     pub volume: Volume,
 }
 
-#[derive(Debug, PartialEq, Default, Clone)]
+#[derive(Display, Debug, PartialEq, Default, Clone)]
 pub enum Shuffle {
     #[default]
     Off,
@@ -27,12 +29,48 @@ pub struct Volume {
     pub right: u8,
 }
 
-#[derive(Debug, PartialEq, Default, Clone)]
+#[derive(Display, Debug, PartialEq, Default, Clone)]
 pub enum AAAMode {
     #[default]
     All,
     Album,
     Artist,
+}
+
+impl TemplateProcessor for PlayerSettings {
+    fn process(&self, template: &String) -> String {
+        #[cfg(feature = "debug")]
+        {
+            info!("Processing template: {}", template);
+            debug!("Processing template with player settings: {:?}", self);
+        }
+        let mut processed = template.clone();
+
+        Self::get_keys(template).iter().for_each(|key| {
+            let value = match key.as_str() {
+                "repeat" => self.repeat.to_string(),
+                "repeat_current" => self.repeat_current.to_string(),
+                "shuffle" => self.shuffle.to_string(),
+                "aaa_mode" => self.aaa_mode.to_string(),
+                "volume_left" => self.volume.left.to_string(),
+                "volume_right" => self.volume.right.to_string(),
+                "volume" => {
+                    if self.volume.left == self.volume.right {
+                        self.volume.left.to_string()
+                    } else {
+                        format!("{}:{}", self.volume.left, self.volume.right)
+                    }
+                }
+                _ => "".to_string(),
+            };
+            processed = processed.replace(&format!("{{{key}}}"), &value);
+        });
+
+        #[cfg(feature = "debug")]
+        info!("Processed template: {}", processed);
+
+        processed
+    }
 }
 
 impl FromStr for AAAMode {
@@ -165,7 +203,7 @@ mod tests {
                 volume: Volume {
                     left: 46,
                     right: 46,
-                }
+                },
             })
         );
     }

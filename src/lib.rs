@@ -1,9 +1,9 @@
 #![feature(assert_matches)]
 
+use crate::cmus::TemplateProcessor;
 #[cfg(feature = "debug")]
 use log::{debug, info};
 use std::path::Path;
-use crate::cmus::TemplateProcessor;
 
 pub mod cmus;
 pub mod notification;

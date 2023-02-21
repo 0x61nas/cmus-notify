@@ -5,6 +5,7 @@ pub mod query;
 use crate::cmus::query::CmusQueryResponse;
 #[cfg(feature = "debug")]
 use log::{debug, info};
+use parse_display::Display;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::num::ParseIntError;
@@ -14,6 +15,27 @@ use typed_builder::TypedBuilder;
 
 pub trait TemplateProcessor {
     fn process(&self, template: &String) -> String;
+    fn get_keys(template: &String) -> Vec<String> {
+        let mut keys = Vec::new(); // Just a buffer to store the keys.
+        let mut key = String::new(); // Just a buffer to build the key.
+
+        for c in template.chars() {
+            if c == '{' {
+                key = String::new();
+            } else if c == '}' {
+                #[cfg(feature = "debug")]
+                debug!("Found key: {}", key);
+                keys.push(key.clone());
+            } else {
+                key.push(c);
+            }
+        }
+
+        #[cfg(feature = "debug")]
+        debug!("Found keys: {:?}", keys);
+
+        keys
+    }
 }
 
 #[derive(Debug, PartialEq, Default, Clone)]
@@ -21,7 +43,7 @@ pub struct TrackMetadata {
     tags: HashMap<String, String>,
 }
 
-#[derive(Debug, PartialEq, Default, Clone)]
+#[derive(Display, Debug, PartialEq, Default, Clone)]
 pub enum TrackStatus {
     Playing,
     Paused,
@@ -72,26 +94,19 @@ impl TemplateProcessor for Track {
         }
         let mut processed = template.clone();
 
-        let mut key = String::new(); // Just a buffer to store the key.
-
-        for c in template.chars() {
-            if c == '{' {
-                key = String::new();
-            } else if c == '}' {
-                #[cfg(feature = "debug")]
-                debug!("Replacing the placeholder {{{key}}} with its matching value.");
-                // Replace the key with their matching value if exists, if not replace with the empty string.
-                processed = processed.replace(
-                    &format!("{{{}}}", key),
-                    match key.as_str() {
-                        "title" => self.get_name(),
-                        _ => self.metadata.get(&key).unwrap_or(""),
-                    },
-                );
-            } else {
-                key.push(c);
+        Self::get_keys(template).iter().for_each(|key| {
+            #[cfg(feature = "debug")]
+            debug!("Replacing the placeholder {{{key}}} with its matching value.");
+            // Replace the key with their matching value if exists, if not replace with the empty string.
+            let status = self.status.to_string();
+            if let Some(value) = match key.as_str() {
+                "status" => Some(status.as_str()),
+                "title" => Some(self.get_name()),
+                _ => self.metadata.get(&key),
+            } {
+                processed = processed.replace(&format!("{{{key}}}"), value);
             }
-        }
+        });
 
         #[cfg(feature = "debug")]
         debug!("Processed template: {processed}");

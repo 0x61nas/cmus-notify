@@ -1,8 +1,8 @@
 use crate::cmus::player_settings::{AAAMode, PlayerSettings, Shuffle};
 use crate::cmus::{Track, TrackStatus};
 use crate::notification::Action;
-use crate::process_template_placeholders;
 use crate::settings::Settings;
+use crate::{process_template_placeholders, settings};
 
 #[derive(Debug, PartialEq)]
 pub enum CmusEvent {
@@ -51,19 +51,19 @@ impl CmusEvent {
         match self {
             StatusChanged(track, player_settings) => (
                 process_template_placeholders(
-                    &settings.status_notification_body,
+                    settings.status_notification_body(),
                     track,
                     player_settings,
                 ),
                 Action::Show,
             ),
             TrackChanged(track, player_settings) => (
-                process_template_placeholders(&settings.body, track, player_settings),
+                process_template_placeholders(settings.body(), track, player_settings),
                 Action::Show,
             ),
             VolumeChanged(track, player_settings) => (
                 process_template_placeholders(
-                    &settings.volume_notification_body,
+                    settings.volume_notification_body(),
                     track,
                     player_settings,
                 ),
@@ -74,7 +74,7 @@ impl CmusEvent {
             }
             ShuffleChanged(track, player_settings) => (
                 process_template_placeholders(
-                    &settings.shuffle_notification_body,
+                    settings.shuffle_notification_body(),
                     track,
                     player_settings,
                 ),
@@ -82,7 +82,7 @@ impl CmusEvent {
             ),
             RepeatChanged(track, player_settings) => (
                 process_template_placeholders(
-                    &settings.repeat_notification_body,
+                    settings.repeat_notification_body(),
                     track,
                     player_settings,
                 ),
@@ -90,7 +90,7 @@ impl CmusEvent {
             ),
             AAAMode(track, player_settings) => (
                 process_template_placeholders(
-                    &settings.aaa_mode_notification_body,
+                    settings.aaa_mode_notification_body(),
                     track,
                     player_settings,
                 ),
@@ -105,19 +105,19 @@ impl CmusEvent {
         match self {
             StatusChanged(track, player_settings) => (
                 process_template_placeholders(
-                    &settings.status_notification_summary,
+                    settings.status_notification_summary(),
                     track,
                     player_settings,
                 ),
                 Action::Show,
             ),
             TrackChanged(track, player_settings) => (
-                process_template_placeholders(&settings.summary, track, player_settings),
+                process_template_placeholders(settings.summary(), track, player_settings),
                 Action::Show,
             ),
             VolumeChanged(track, player_settings) => (
                 process_template_placeholders(
-                    &settings.volume_notification_summary,
+                    settings.volume_notification_summary(),
                     track,
                     player_settings,
                 ),
@@ -128,7 +128,7 @@ impl CmusEvent {
             }
             ShuffleChanged(track, player_settings) => (
                 process_template_placeholders(
-                    &settings.shuffle_notification_summary,
+                    settings.shuffle_notification_summary(),
                     track,
                     player_settings,
                 ),
@@ -136,7 +136,7 @@ impl CmusEvent {
             ),
             RepeatChanged(track, player_settings) => (
                 process_template_placeholders(
-                    &settings.repeat_notification_summary,
+                    settings.repeat_notification_summary(),
                     track,
                     player_settings,
                 ),
@@ -144,7 +144,7 @@ impl CmusEvent {
             ),
             AAAMode(track, player_settings) => (
                 process_template_placeholders(
-                    &settings.aaa_mode_notification_summary,
+                    settings.aaa_mode_notification_summary(),
                     track,
                     player_settings,
                 ),

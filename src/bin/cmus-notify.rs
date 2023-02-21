@@ -1,6 +1,6 @@
 use cmus_notify::{
     cmus::{self, events::CmusEvent, query::CmusQueryResponse},
-    notification,
+    notification, settings,
     settings::Settings,
     track_cover, TrackCover,
 };
@@ -38,19 +38,15 @@ fn main() {
     }
 
     // Build the command, or use the default. (to speed up the main loop, because we don't need to build it every time)
-    let remote_bin_path = settings
-        .cmus_remote_bin_path
-        .clone()
-        .unwrap_or("cmus-remote".to_string());
     let mut query_command = cmus::build_query_command(
-        remote_bin_path.as_str(),
+        settings.remote_bin_path().as_str(),
         &settings.cmus_socket_address,
         &settings.cmus_socket_password,
     );
     #[cfg(feature = "debug")]
     info!("Query command built: {:?}", query_command);
 
-    let interval = settings.interval;
+    let interval = settings.interval();
     let link = settings.link;
 
     let mut notifications_handler = notification::NotificationsHandler::new(settings);

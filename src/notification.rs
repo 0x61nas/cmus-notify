@@ -3,7 +3,7 @@ use crate::cmus::player_settings::PlayerSettings;
 use crate::cmus::query::CmusQueryResponse;
 use crate::cmus::{Track, TrackStatus};
 use crate::settings::Settings;
-use crate::{process_template_placeholders, track_cover, TrackCover};
+use crate::{process_template_placeholders, settings, track_cover, TrackCover};
 #[cfg(feature = "debug")]
 use log::{debug, info};
 use notify_rust::Notification;
@@ -94,8 +94,7 @@ impl NotificationsHandler {
         // Reset the notification
         self.notification = Notification::new();
         self.notification
-            .appname("cmus-notify")
-            .timeout(self.settings.timeout as i32 * 1000)
+            .appname(self.settings.app_name().as_str())
             .hint(notify_rust::Hint::Category("music".to_string()))
             .hint(notify_rust::Hint::DesktopEntry("cmus.desktop".to_string()))
             .hint(notify_rust::Hint::Resident(true));
@@ -103,7 +102,7 @@ impl NotificationsHandler {
         // Get the track cover and set it to notification
         track_cover(
             &track.path,
-            self.settings.depth,
+            self.settings.depth(),
             self.settings.force_use_external_cover,
             self.settings.no_use_external_cover,
         )

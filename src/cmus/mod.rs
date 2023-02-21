@@ -14,11 +14,11 @@ use thiserror::Error;
 use typed_builder::TypedBuilder;
 
 pub trait TemplateProcessor {
-    fn process(&self, template: &String) -> String;
+    fn process(&self, template: String) -> String;
 
     /// Returns a vector of keys found in the template.
     /// The keys are the strings between curly braces.
-    fn get_keys(template: &String) -> Vec<String> {
+    fn get_keys(template: &str) -> Vec<String> {
         let mut keys = Vec::new(); // Just a buffer to store the keys.
         let mut key = String::new(); // Just a buffer to build the key.
 
@@ -92,16 +92,16 @@ impl TemplateProcessor for Track {
     /// The template is a string with placeholders that will be replaced with the track metadata.
     /// The unknown placeholders will be skipped (don't replaced with anything, because they are maybe placeholders for player settings).
     #[inline(always)]
-    fn process(&self, template: &String) -> String {
+    fn process(&self, template: String) -> String {
         #[cfg(feature = "debug")]
         {
             info!("Processing the template placeholders.");
             debug!("Template: {template}");
             debug!("Track: {self:?}");
         }
-        let mut processed = template.clone();
+        let mut processed = template.to_string();
 
-        Self::get_keys(template).iter().for_each(|key| {
+        Self::get_keys(template.as_str()).iter().for_each(|key| {
             #[cfg(feature = "debug")]
             debug!("Replacing the placeholder {{{key}}} with its matching value.");
             // Replace the key with their matching value if exists, if not replace with the empty string.

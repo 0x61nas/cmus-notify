@@ -42,7 +42,7 @@ impl TemplateProcessor for PlayerSettings {
     /// If the key is unknown, it will be replaced with an empty string.
     /// This function should be used after the track metadata placeholders have been replaced.
     #[inline(always)]
-    fn process(&self, template: &String) -> String {
+    fn process(&self, template: String) -> String {
         #[cfg(feature = "debug")]
         {
             info!("Processing template: {}", template);
@@ -50,7 +50,7 @@ impl TemplateProcessor for PlayerSettings {
         }
         let mut processed = template.clone();
 
-        Self::get_keys(template).iter().for_each(|key| {
+        Self::get_keys(template.as_str()).iter().for_each(|key| {
             let value = match key.as_str() {
                 "repeat" => self.repeat.to_string(),
                 "repeat_current" => self.repeat_current.to_string(),

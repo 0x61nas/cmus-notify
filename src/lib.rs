@@ -212,12 +212,12 @@ fn search(search_directory: &str, matcher: &regex::Regex) -> std::io::Result<Opt
 /// Replace all the placeholders in the template with their matching value.
 #[inline(always)]
 pub fn process_template_placeholders(
-    template: &String,
+    template: String,
     track: &cmus::Track,
     player_settings: &cmus::player_settings::PlayerSettings,
 ) -> String {
     let res = track.process(template);
-    player_settings.process(&res)
+    player_settings.process(res)
 }
 
 #[cfg(test)]

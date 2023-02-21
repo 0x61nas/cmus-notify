@@ -53,13 +53,11 @@ impl NotificationsHandler {
         //FIXME: Should check if the user has enabled the cover feature or use a static cover.
         self.update_cover(&events[0], response);
 
-        let mut action = Action::None;
-
         for event in events {
             #[cfg(feature = "debug")]
             info!("event: {:?}", event);
 
-            action = event.build_notification(&mut self.settings, &mut self.notification);
+            let action = event.build_notification(&mut self.settings, &mut self.notification);
 
             match action {
                 Action::Show => {

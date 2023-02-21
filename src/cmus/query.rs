@@ -44,6 +44,7 @@ impl CmusQueryResponse {
         PlayerSettings::from_str(&self.player_settings_row)
     }
 
+    /// Compare this response with another one, and return the events that happened.
     pub fn events(&self, other: &Self) -> Result<Vec<CmusEvent>, CmusError> {
         #[cfg(feature = "debug")]
         info!("Comparing cmus responses: {:?} and {:?}", self, other);

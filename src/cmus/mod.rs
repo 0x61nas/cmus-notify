@@ -15,6 +15,9 @@ use typed_builder::TypedBuilder;
 
 pub trait TemplateProcessor {
     fn process(&self, template: &String) -> String;
+
+    /// Returns a vector of keys found in the template.
+    /// The keys are the strings between curly braces.
     fn get_keys(template: &String) -> Vec<String> {
         let mut keys = Vec::new(); // Just a buffer to store the keys.
         let mut key = String::new(); // Just a buffer to build the key.
@@ -85,6 +88,9 @@ pub enum CmusError {
 }
 
 impl TemplateProcessor for Track {
+    /// Process the template with the track metadata.
+    /// The template is a string with placeholders that will be replaced with the track metadata.
+    /// The unknown placeholders will be skipped (don't replaced with anything, because they are maybe placeholders for player settings).
     fn process(&self, template: &String) -> String {
         #[cfg(feature = "debug")]
         {

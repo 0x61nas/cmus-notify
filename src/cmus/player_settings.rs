@@ -38,6 +38,9 @@ pub enum AAAMode {
 }
 
 impl TemplateProcessor for PlayerSettings {
+    /// Replace all keys in the template with the corresponding values.
+    /// If the key is unknown, it will be replaced with an empty string.
+    /// This function should be used after the track metadata placeholders have been replaced.
     fn process(&self, template: &String) -> String {
         #[cfg(feature = "debug")]
         {

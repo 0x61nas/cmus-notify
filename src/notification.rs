@@ -54,6 +54,7 @@ impl NotificationsHandler {
         self.update_cover(&events[0], response);
 
         for event in events {
+            self.setup_notification_timeout(&event);
             #[cfg(feature = "debug")]
             info!("event: {:?}", event);
 
@@ -92,13 +93,7 @@ impl NotificationsHandler {
     #[inline]
     fn set_cover(&mut self, track: &Track) {
         // Reset the notification
-        self.notification = Notification::new();
-        self.notification
-            .appname(self.settings.app_name().as_str())
-            .hint(notify_rust::Hint::Category("music".to_string()))
-            .hint(notify_rust::Hint::DesktopEntry("cmus.desktop".to_string()))
-            .hint(notify_rust::Hint::Resident(true));
-
+        self.setup_the_notification();
         // Get the track cover and set it to notification
         track_cover(
             &track.path,
@@ -109,5 +104,29 @@ impl NotificationsHandler {
         .set_notification_image(&mut self.notification);
         // Flip the change flag
         self.cover_set = true;
+    }
+
+    #[inline(always)]
+    fn setup_the_notification(&mut self) {
+        self.notification = Notification::new();
+        self.notification
+            .appname(self.settings.app_name().as_str())
+            .hint(notify_rust::Hint::Category("music".to_string()))
+            .hint(notify_rust::Hint::DesktopEntry("cmus.desktop".to_string()))
+            .hint(notify_rust::Hint::Resident(true));
+    }
+
+    #[inline(always)]
+    fn setup_notification_timeout(&mut self, event: &CmusEvent) {
+        use CmusEvent::*;
+        self.notification.timeout(match event {
+            TrackChanged(_, _) =>   self.settings.timeout(),
+            StatusChanged(_, _) => self.settings.status_notification_timeout(),
+            AAAMode(_, _) => self.settings.aaa_mode_notification_timeout(),
+            VolumeChanged(_, _) => self.settings.volume_notification_timeout(),
+            RepeatChanged(_, _) => self.settings.repeat_notification_timeout(),
+            ShuffleChanged(_, _) => self.settings.shuffle_notification_timeout(),
+            _ => self.settings.timeout(),
+        } as i32 * 1000);
     }
 }

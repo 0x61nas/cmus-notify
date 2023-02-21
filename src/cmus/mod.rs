@@ -91,6 +91,7 @@ impl TemplateProcessor for Track {
     /// Process the template with the track metadata.
     /// The template is a string with placeholders that will be replaced with the track metadata.
     /// The unknown placeholders will be skipped (don't replaced with anything, because they are maybe placeholders for player settings).
+    #[inline(always)]
     fn process(&self, template: &String) -> String {
         #[cfg(feature = "debug")]
         {

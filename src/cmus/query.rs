@@ -81,7 +81,7 @@ impl CmusQueryResponse {
                     other_track.status, track.status
                 );
                 events.push(CmusEvent::StatusChanged(
-                    track.clone(),
+                    other_track.clone(),
                     other_player_settings.clone(),
                 ));
             } else if track.position != other_track.position {

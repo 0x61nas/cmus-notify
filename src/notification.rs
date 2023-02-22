@@ -50,8 +50,15 @@ impl NotificationsHandler {
         events: Vec<CmusEvent>,
         response: &CmusQueryResponse,
     ) -> Result<(), notify_rust::error::Error> {
-        //FIXME: Should check if the user has enabled the cover feature or use a static cover.
-        self.update_cover(&events[0], response);
+        // Setup the notification cover
+        if self.settings.show_track_cover {
+            self.update_cover(&events[0], response);
+        } else if self.settings.notification_static_cover.is_some() && !self.cover_set {
+            self.setup_the_notification();
+            self.notification
+                .image_path(self.settings.notification_static_cover.as_ref().unwrap());
+            self.cover_set = true;
+        }
 
         for event in events {
             self.setup_notification_timeout(&event);
@@ -95,13 +102,20 @@ impl NotificationsHandler {
         // Reset the notification
         self.setup_the_notification();
         // Get the track cover and set it to notification
-        track_cover(
+        let track_cover = track_cover(
             &track.path,
             self.settings.depth(),
             self.settings.force_use_external_cover,
             self.settings.no_use_external_cover,
-        )
-        .set_notification_image(&mut self.notification);
+        );
+
+        if track_cover != TrackCover::None {
+            track_cover.set_notification_image(&mut self.notification);
+        } else if self.settings.notification_static_cover.is_some() {
+            self.notification
+                .image_path(self.settings.notification_static_cover.as_ref().unwrap());
+        }
+
         // Flip the change flag
         self.cover_set = true;
     }
@@ -120,7 +134,7 @@ impl NotificationsHandler {
     fn setup_notification_timeout(&mut self, event: &CmusEvent) {
         use CmusEvent::*;
         self.notification.timeout(match event {
-            TrackChanged(_, _) =>   self.settings.timeout(),
+            TrackChanged(_, _) => self.settings.timeout(),
             StatusChanged(_, _) => self.settings.status_notification_timeout(),
             AAAMode(_, _) => self.settings.aaa_mode_notification_timeout(),
             VolumeChanged(_, _) => self.settings.volume_notification_timeout(),

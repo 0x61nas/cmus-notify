@@ -49,7 +49,7 @@ pub struct Settings {
     /// you can give it the full path to an image file or a name of an icon from the current icon theme
     /// (e.g. "audio-x-generic" or "spotify-client")
     #[arg(short = 'i', long = "icon", default_value = None)]
-    notification_static_icon: Option<String>,
+    pub notification_static_cover: Option<String>,
     /// The path to look for the cover image, if not given, the cover will be searched in the track's directory
     /// for an image file with the name "cover".
     ///
@@ -61,7 +61,7 @@ pub struct Settings {
     ///
     /// If you not specify the full path, the cover will be started from the track's directory.
     #[arg(short = 'w', long = "cover-path", default_value = None)]
-    cover_path: Option<String>,
+    cover_path_template: Option<String>,
     #[cfg(feature = "lyrics")]
     /// The lyrics file path, if not given, the lyrics will be searched in the track's directory
     /// for a text file with the name "lyrics", or with the same name as the track.
@@ -257,8 +257,8 @@ impl Default for Settings {
             timeout: Some(NOTIFICATION_TIMEOUT),
             persistent: false,
             show_track_cover: true,
-            notification_static_icon: None,
-            cover_path: None,
+            notification_static_cover: None,
+            cover_path_template: None,
             #[cfg(feature = "lyrics")]
             lyrics_path: None,
             depth: Some(DEFAULT_MAX_DEPTH),
@@ -342,10 +342,10 @@ impl Settings {
         cfg.timeout = args.timeout.or(cfg.timeout);
         cfg.persistent = args.persistent || cfg.persistent;
         cfg.show_track_cover = args.show_track_cover || cfg.show_track_cover;
-        cfg.notification_static_icon = args
-            .notification_static_icon
-            .or(cfg.notification_static_icon);
-        cfg.cover_path = args.cover_path.or(cfg.cover_path);
+        cfg.notification_static_cover = args
+            .notification_static_cover
+            .or(cfg.notification_static_cover);
+        cfg.cover_path_template = args.cover_path_template.or(cfg.cover_path_template);
         #[cfg(feature = "lyrics")]
         if args.lyrics_path != None {
             #[cfg(feature = "debug")]

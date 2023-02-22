@@ -1,6 +1,6 @@
 #![feature(assert_matches)]
 
-use crate::cmus::TemplateProcessor;
+use crate::cmus::{TemplateProcessor, Track};
 #[cfg(feature = "debug")]
 use log::{debug, info};
 use std::path::Path;
@@ -153,26 +153,26 @@ impl TrackCover {
 /// If the track has an embedded cover, and `force_use_external_cover` is `true`, the function will search for an external cover.
 #[inline]
 pub fn track_cover(
-    track_path: &str,
+    track: &Track,
     max_depth: u8,
     force_use_external_cover: bool,
     no_use_external_cover: bool,
 ) -> TrackCover {
     if !force_use_external_cover {
         #[cfg(feature = "debug")]
-        info!("Trying to get the embedded cover of \"{track_path}\".");
-        if let Ok(Some(cover)) = get_embedded_art(track_path) {
+        info!("Trying to get the embedded cover of \"{track_path}\".", track_path = track.path);
+        if let Ok(Some(cover)) = get_embedded_art(&track.path) {
             return TrackCover::Embedded(cover);
         }
     }
 
     if !no_use_external_cover {
         #[cfg(feature = "debug")]
-        info!("Trying to get the external cover of \"{track_path}\".");
+        info!("Trying to get the external cover of \"{track_path}\".", track_path = track.path);
         if let Ok(Some(cover)) = search_for(
-            track_path,
+            &track.path,
             max_depth,
-            &regex::Regex::new(r".*\.(jpg|jpeg|png|gif)$").unwrap(),
+            &regex::Regex::new(&format!(r"(cover|{track_name}).*\.(jpg|jpeg|png|gif)$", track_name = track.get_name())).unwrap(),
         ) {
             #[cfg(feature = "debug")]
             info!("Found the external cover \"{cover}\".");
@@ -186,7 +186,7 @@ pub fn track_cover(
     }
 
     #[cfg(feature = "debug")]
-    info!("Could not get the cover of \"{track_path}\".");
+    info!("Could not get the cover of \"{track_path}\".", track_path = track.path);
 
     TrackCover::None
 }
@@ -226,9 +226,11 @@ mod tests {
     use std::assert_matches::assert_matches;
     use std::str::FromStr;
     use test_context::{test_context, TestContext};
+    use crate::cmus::player_settings::PlayerSettings;
 
     struct TestContextWithFullTrack {
-        track: cmus::Track,
+        track: Track,
+        player_settings: PlayerSettings,
     }
 
     impl TestContext for TestContextWithFullTrack {
@@ -236,6 +238,10 @@ mod tests {
             Self {
                 track: cmus::Track::from_str(include_str!(
                     "../tests/samples/cmus-remote-output-with-all-tags.txt"
+                ))
+                .unwrap(),
+                player_settings: PlayerSettings::from_str(include_str!(
+                    "../tests/samples/player_settings_mode-artist_vol-46_repeat-false_repeat_current-false_shuffle-tracks.txt"
                 ))
                 .unwrap(),
             }
@@ -246,7 +252,7 @@ mod tests {
     #[test]
     fn test_process_path_template(ctx: &TestContextWithFullTrack) {
         let cover_path_template = String::from("{title}/{artist}/{album}/{tracknumber}");
-        let cover_path = process_template_placeholders(&cover_path_template, &ctx.track);
+        let cover_path = process_template_placeholders(cover_path_template, &ctx.track, &ctx.player_settings);
 
         assert_eq!(
             cover_path,

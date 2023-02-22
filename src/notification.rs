@@ -71,8 +71,8 @@ impl NotificationsHandler {
                 Action::Show => {
                     let _ = self.notification.show()?;
                 }
+                Action::Update => todo!("Update notification"),
                 Action::None => {}
-                _ => todo!(),
             };
         }
 
@@ -103,7 +103,7 @@ impl NotificationsHandler {
         self.setup_the_notification();
         // Get the track cover and set it to notification
         let track_cover = track_cover(
-            &track.path,
+            track,
             self.settings.depth(),
             self.settings.force_use_external_cover,
             self.settings.no_use_external_cover,

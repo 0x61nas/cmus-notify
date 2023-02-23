@@ -2,11 +2,11 @@ use crate::cmus::{CmusError, TemplateProcessor};
 #[cfg(feature = "debug")]
 use log::{debug, info};
 use parse_display::Display;
-use std::fmt::{Display, Formatter};
 use std::num::ParseIntError;
 use std::str::FromStr;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(PartialEq, Clone)]
+#[cfg_attr(feature = "debug", derive(Debug))]
 pub struct PlayerSettings {
     pub repeat: bool,
     pub repeat_current: bool,
@@ -15,7 +15,8 @@ pub struct PlayerSettings {
     pub volume: Volume,
 }
 
-#[derive(Display, Debug, PartialEq, Default, Clone)]
+#[derive(Display, PartialEq, Default, Clone)]
+#[cfg_attr(feature = "debug", derive(Debug))]
 pub enum Shuffle {
     #[default]
     Off,
@@ -23,13 +24,15 @@ pub enum Shuffle {
     Albums,
 }
 
-#[derive(Debug, PartialEq, Default, Clone)]
+#[derive(PartialEq, Default, Clone)]
+#[cfg_attr(feature = "debug", derive(Debug))]
 pub struct Volume {
     pub left: u8,
     pub right: u8,
 }
 
-#[derive(Display, Debug, PartialEq, Default, Clone)]
+#[derive(Display, PartialEq, Default, Clone)]
+#[cfg_attr(feature = "debug", derive(Debug))]
 pub enum AAAMode {
     #[default]
     All,

@@ -4,7 +4,8 @@ use crate::notification::Action;
 use crate::settings::Settings;
 use crate::{process_template_placeholders, settings};
 
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
+#[cfg_attr(any(feature = "debug", test), derive(Debug))]
 pub enum CmusEvent {
     StatusChanged(Track, PlayerSettings),
     TrackChanged(Track, PlayerSettings),

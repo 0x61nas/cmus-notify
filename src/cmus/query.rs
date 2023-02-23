@@ -8,7 +8,8 @@ use std::str::FromStr;
 /// This struct is used to store the row status response from cmus.
 /// So we don't parse it and take the time then we don't need it.
 /// We only parse it when we need it.
-#[derive(Debug, PartialEq, Default)]
+#[derive(PartialEq, Default)]
+#[cfg_attr(feature = "debug", derive(Debug))]
 pub struct CmusQueryResponse {
     track_row: String,
     player_settings_row: String,

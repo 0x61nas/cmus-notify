@@ -114,7 +114,8 @@ pub fn search_for(
 }
 
 /// The cover of a track.
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
+#[cfg_attr(any(feature = "debug", test), derive(Debug))]
 pub enum TrackCover {
     /// The cover is embedded in the track.
     /// The `DynamicImage` object contains the contents of the embedded picture.

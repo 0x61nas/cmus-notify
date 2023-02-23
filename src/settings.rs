@@ -32,7 +32,8 @@ const DEFAULT_LYRICS_NOTIFICATION_BODY: &str = "{lyrics}";
 #[cfg(feature = "lyrics")]
 const DEFAULT_LYRICS_NOTIFICATION_SUMMARY: &str = "Lyrics";
 
-#[derive(Parser, Debug, Serialize, Deserialize)]
+#[derive(Parser, Serialize, Deserialize)]
+#[cfg_attr(feature = "debug", derive(Debug))]
 #[command(author, about, version, long_about = None)]
 pub struct Settings {
     /// The notification timeout, in seconds

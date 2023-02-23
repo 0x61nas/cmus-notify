@@ -41,12 +41,14 @@ pub trait TemplateProcessor {
     }
 }
 
-#[derive(Debug, PartialEq, Default, Clone)]
+#[derive(PartialEq, Default, Clone)]
+#[cfg_attr(any(feature = "debug", test), derive(Debug))]
 pub struct TrackMetadata {
     tags: HashMap<String, String>,
 }
 
-#[derive(Display, Debug, PartialEq, Default, Clone)]
+#[derive(Display, PartialEq, Default, Clone)]
+#[cfg_attr(any(feature = "debug", test), derive(Debug))]
 pub enum TrackStatus {
     Playing,
     Paused,
@@ -54,7 +56,8 @@ pub enum TrackStatus {
     Stopped,
 }
 
-#[derive(Debug, TypedBuilder, PartialEq, Default, Clone)]
+#[derive(TypedBuilder, PartialEq, Default, Clone)]
+#[cfg_attr(any(feature = "debug", test), derive(Debug))]
 pub struct Track {
     pub status: TrackStatus,
     pub path: String,

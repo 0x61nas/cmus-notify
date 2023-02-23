@@ -49,7 +49,7 @@ pub struct Settings {
     ///
     /// you can give it the full path to an image file or a name of an icon from the current icon theme
     /// (e.g. "audio-x-generic" or "spotify-client")
-    #[arg(short = 'i', long = "icon", default_value = None)]
+    #[arg(short = 'i', long = "icon")]
     pub notification_static_cover: Option<String>,
     /// The path to look for the cover image, if not given, the cover will be searched in the track's directory
     /// for an image file with the name "cover".
@@ -61,7 +61,7 @@ pub struct Settings {
     /// e.g. "covers/{artist}/{album}/cover.*", "covers/{artist}/{album}/*",
     ///
     /// If you not specify the full path, the cover will be started from the track's directory.
-    #[arg(short = 'w', long = "cover-path", default_value = None)]
+    #[arg(short = 'w', long = "cover-path")]
     pub cover_path_template: Option<String>,
     #[cfg(feature = "lyrics")]
     /// The lyrics file path, if not given, the lyrics will be searched in the track's directory
@@ -74,16 +74,16 @@ pub struct Settings {
     /// e.g. "lyrics/{artist}/{album}/{title}.lrc", "lyrics/{artist}/{album}/*",
     ///
     /// If you not specify the full path, the lyrics will be started from the track's directory.
-    #[arg(short = 'y', long, default_value = None)]
+    #[arg(short = 'y', long)]
     lyrics_path: Option<String>,
     /// The maximum path depth to search for the cover and lyrics files,
     /// if the files are not found in the track's directory, or the directory specified by the `--cover-path`
     /// or `--lyrics-path`* options, the program will search in the parent directory,
     /// and so on, until the maximum depth is reached.
-    #[arg(short, long, default_value = None)]
+    #[arg(short, long)]
     depth: Option<u8>,
     /// The name of the app to use for the notification.
-    #[arg(short, long, default_value = None)]
+    #[arg(short, long)]
     pub app_name: Option<String>,
     /// The summary of the notification.
     ///
@@ -91,7 +91,7 @@ pub struct Settings {
     /// "{disc_number}" and "{year}" and "{genre}" in the summary, they will be replaced with the corresponding metadata.
     /// but if the metadata is not available, the placeholder will be replaced with an empty string.
     /// e.g. "{artist} - {title}"
-    #[arg(short, long, default_value = None)]
+    #[arg(short, long)]
     summary: Option<String>,
     #[cfg(feature = "lyrics")]
     /// The body of the notification.
@@ -111,7 +111,7 @@ pub struct Settings {
     /// the notification will be persistent, and you need to dismiss it manually tow times.
     ///
     /// Also you can use the simple html markup, if your notification server supports it.
-    #[arg(default_value = None)]
+    #[arg()]
     body: Option<String>,
     #[cfg(not(feature = "lyrics"))]
     /// The body of the notification.
@@ -127,19 +127,19 @@ pub struct Settings {
     /// the notification will be persistent, and you need to dismiss it manually tow times.
     ///
     /// Also you can use the simple html markup, if your notification server supports it.
-    #[arg(default_value = None)]
+    #[arg()]
     body: Option<String>,
     /// The cmus-remote binary path, if not given, the program will search for it in the PATH environment variable.
     ///
     /// if you're using a custom package format like flatpak, or snap, you can give it the full run command (without any arguments),
     /// e.g. "flatpak run io.github.cmus.cmus", "snap run cmus"
-    #[arg(short = 'b', long = "cmus-remote-bin", default_value = None)]
+    #[arg(short = 'b', long = "cmus-remote-bin")]
     cmus_remote_bin_path: Option<String>,
     /// The cmus socket address, if not given, the program will use the default socket address, which is "$XDG_RUNTIME_DIR/cmus-socket".
-    #[arg(short = 'k', long = "cmus-socket", default_value = None)]
+    #[arg(short = 'k', long = "cmus-socket")]
     pub cmus_socket_address: Option<String>,
     /// The cmus socket password, if any.
-    #[arg(short = 'x', long = "socket-password", default_value = None)]
+    #[arg(short = 'x', long = "socket-password")]
     pub cmus_socket_password: Option<String>,
     /// The interval to request the cmus status, in milliseconds.
     ///
@@ -151,7 +151,7 @@ pub struct Settings {
     /// but it will make the notification a little bit stupid, if you change the track manually, the notification will not update until the track duration time is reached.
     ///
     /// but I recommend 1s, it's not too fast, and not too slow, and it will not waste your CPU and battery.
-    #[arg(short = 'r', long, default_value = None)]
+    #[arg(short = 'r', long)]
     interval: Option<u64>,
     /// Link the program with cmus, if the cmus are not running, the program will exit.
     #[arg(short = 'l', long)]
@@ -178,13 +178,13 @@ pub struct Settings {
     /// you can use the placeholders like "{volume}" in the body, it will be replaced with the shuffle mode.
     ///
     /// If you leave it empty, the notification will not be shown.
-    #[arg(short = 'B', long, default_value = None)]
+    #[arg(short = 'B', long)]
     volume_notification_body: Option<String>,
     /// The volume change notification summary.
-    #[arg(short = 'E', long, default_value = None)]
+    #[arg(short = 'E', long)]
     volume_notification_summary: Option<String>,
     /// The time out of the volume change notification, in seconds.
-    #[arg(short = 'T', long, default_value = None)]
+    #[arg(short = 'T', long)]
     volume_notification_timeout: Option<u8>,
     /// The shuffle mode change notification body.
     /// you can use the placeholders like "{shuffle}" in the body, it will be replaced with the shuffle mode.

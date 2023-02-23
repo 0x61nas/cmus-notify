@@ -117,7 +117,7 @@ pub fn search_for(
 #[derive(Debug, PartialEq)]
 pub enum TrackCover {
     /// The cover is embedded in the track.
-    /// The `TempFile` object contains the contents of the embedded picture.
+    /// The `DynamicImage` object contains the contents of the embedded picture.
     Embedded(image::DynamicImage),
     /// The cover is an external file.
     /// The `String` contains the absolute path of the external file.

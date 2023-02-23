@@ -153,26 +153,39 @@ impl TrackCover {
 /// If the track has an embedded cover, and `force_use_external_cover` is `true`, the function will search for an external cover.
 #[inline]
 pub fn track_cover(
-    track: &Track,
+    mut path: String,
+    track_name: &str,
     max_depth: u8,
     force_use_external_cover: bool,
     no_use_external_cover: bool,
 ) -> TrackCover {
     if !force_use_external_cover {
         #[cfg(feature = "debug")]
-        info!("Trying to get the embedded cover of \"{track_path}\".", track_path = track.path);
-        if let Ok(Some(cover)) = get_embedded_art(&track.path) {
+        info!("Trying to get the embedded cover of \"{path}\".");
+        if let Ok(Some(cover)) = get_embedded_art(&path) {
             return TrackCover::Embedded(cover);
         }
     }
 
     if !no_use_external_cover {
+        let (Ok(regx), path) = (match path.split("/").last() {
+            Some(last_pat) if last_pat.contains("r#") => {
+                (regex::Regex::new(&*last_pat.replace("r#", "")),
+                // Remove the last part of the path
+                path.remove(path.len() - last_pat.len() - 1).to_string())
+            }
+            _ => (regex::Regex::new(&format!(r"({track_name}).*\.(jpg|jpeg|png|gif)$")), path),
+        }) else {
+            #[cfg(feature = "debug")]
+            info!("Could not get the cover.");
+            return TrackCover::None;
+        };
         #[cfg(feature = "debug")]
-        info!("Trying to get the external cover of \"{track_path}\".", track_path = track.path);
+        info!("Trying to get the external cover of \"{path}\".");
         if let Ok(Some(cover)) = search_for(
-            &track.path,
+            &path,
             max_depth,
-            &regex::Regex::new(&format!(r"(cover|{track_name}).*\.(jpg|jpeg|png|gif)$", track_name = track.get_name())).unwrap(),
+            &regx,
         ) {
             #[cfg(feature = "debug")]
             info!("Found the external cover \"{cover}\".");
@@ -186,7 +199,7 @@ pub fn track_cover(
     }
 
     #[cfg(feature = "debug")]
-    info!("Could not get the cover of \"{track_path}\".", track_path = track.path);
+    info!("Could not get the cover.");
 
     TrackCover::None
 }
@@ -213,7 +226,7 @@ fn search(search_directory: &str, matcher: &regex::Regex) -> std::io::Result<Opt
 #[inline(always)]
 pub fn process_template_placeholders(
     template: String,
-    track: &cmus::Track,
+    track: &Track,
     player_settings: &cmus::player_settings::PlayerSettings,
 ) -> String {
     let res = track.process(template);

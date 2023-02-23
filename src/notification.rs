@@ -1,7 +1,7 @@
 use crate::cmus::events::CmusEvent;
 use crate::cmus::player_settings::PlayerSettings;
 use crate::cmus::query::CmusQueryResponse;
-use crate::cmus::{Track, TrackStatus};
+use crate::cmus::{TemplateProcessor, Track, TrackStatus};
 use crate::settings::Settings;
 use crate::{process_template_placeholders, settings, track_cover, TrackCover};
 #[cfg(feature = "debug")]
@@ -101,9 +101,16 @@ impl NotificationsHandler {
     fn set_cover(&mut self, track: &Track) {
         // Reset the notification
         self.setup_the_notification();
+        let path = match &self.settings.cover_path_template {
+            Some(template) => {
+                track.process(template.clone())
+            }
+            None => track.path.clone(),
+        };
         // Get the track cover and set it to notification
         let track_cover = track_cover(
-            track,
+            path,
+            track.get_name(),
             self.settings.depth(),
             self.settings.force_use_external_cover,
             self.settings.no_use_external_cover,

@@ -62,7 +62,7 @@ pub struct Settings {
     ///
     /// If you not specify the full path, the cover will be started from the track's directory.
     #[arg(short = 'w', long = "cover-path", default_value = None)]
-    cover_path_template: Option<String>,
+    pub cover_path_template: Option<String>,
     #[cfg(feature = "lyrics")]
     /// The lyrics file path, if not given, the lyrics will be searched in the track's directory
     /// for a text file with the name "lyrics", or with the same name as the track.

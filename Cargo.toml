@@ -25,7 +25,7 @@ features = ["wrap_help", "cargo", "usage", "derive", "suggestions", "color"]
 [dependencies.confy]
 version = "0.5.1"
 default-features = false
-features = ["yaml_conf"]
+features = ["toml_conf"]
 
 [features]
 lyrics = ["lrc"]

@@ -69,7 +69,7 @@ pub fn get_embedded_art(track_path: &str) -> std::io::Result<Option<image::Dynam
 /// ```
 pub fn search_for(
     search_directory: &str,
-    max_depth: u8,
+    mut max_depth: u8,
     regx: &regex::Regex,
 ) -> std::io::Result<Option<String>> {
     let mut search_directory = if Path::new(search_directory).is_file() {
@@ -88,7 +88,6 @@ pub fn search_for(
         info!("Searching for a file that matches the regular {regx:?} expression in \"{search_directory}\" and its subdirectories.");
         info!("Max depth: {max_depth}");
     }
-    let mut max_depth = max_depth;
 
     loop {
         if let Some(path) = search(search_directory, regx)? {

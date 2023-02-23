@@ -184,11 +184,7 @@ pub fn track_cover(
         };
         #[cfg(feature = "debug")]
         info!("Trying to get the external cover of \"{path}\".");
-        if let Ok(Some(cover)) = search_for(
-            &path,
-            max_depth,
-            &regx,
-        ) {
+        if let Ok(Some(cover)) = search_for(&path, max_depth, &regx) {
             #[cfg(feature = "debug")]
             info!("Found the external cover \"{cover}\".");
             return TrackCover::External(cover);
@@ -233,10 +229,10 @@ pub fn process_template_placeholders(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cmus::player_settings::PlayerSettings;
     use std::assert_matches::assert_matches;
     use std::str::FromStr;
     use test_context::{test_context, TestContext};
-    use crate::cmus::player_settings::PlayerSettings;
 
     struct TestContextWithFullTrack {
         track: Track,
@@ -262,7 +258,8 @@ mod tests {
     #[test]
     fn test_process_path_template(ctx: &TestContextWithFullTrack) {
         let cover_path_template = String::from("{title}/{artist}/{album}/{tracknumber}");
-        let cover_path = process_template_placeholders(cover_path_template, &ctx.track, &ctx.player_settings);
+        let cover_path =
+            process_template_placeholders(cover_path_template, &ctx.track, &ctx.player_settings);
 
         assert_eq!(
             cover_path,

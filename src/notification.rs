@@ -102,9 +102,7 @@ impl NotificationsHandler {
         // Reset the notification
         self.setup_the_notification();
         let path = match &self.settings.cover_path_template {
-            Some(template) => {
-                track.process(template.clone())
-            }
+            Some(template) => track.process(template.clone()),
             None => track.path.clone(),
         };
         // Get the track cover and set it to notification
@@ -140,14 +138,17 @@ impl NotificationsHandler {
     #[inline(always)]
     fn setup_notification_timeout(&mut self, event: &CmusEvent) {
         use CmusEvent::*;
-        self.notification.timeout(match event {
-            TrackChanged(_, _) => self.settings.timeout(),
-            StatusChanged(_, _) => self.settings.status_notification_timeout(),
-            AAAMode(_, _) => self.settings.aaa_mode_notification_timeout(),
-            VolumeChanged(_, _) => self.settings.volume_notification_timeout(),
-            RepeatChanged(_, _) => self.settings.repeat_notification_timeout(),
-            ShuffleChanged(_, _) => self.settings.shuffle_notification_timeout(),
-            _ => self.settings.timeout(),
-        } as i32 * 1000);
+        self.notification.timeout(
+            match event {
+                TrackChanged(_, _) => self.settings.timeout(),
+                StatusChanged(_, _) => self.settings.status_notification_timeout(),
+                AAAMode(_, _) => self.settings.aaa_mode_notification_timeout(),
+                VolumeChanged(_, _) => self.settings.volume_notification_timeout(),
+                RepeatChanged(_, _) => self.settings.repeat_notification_timeout(),
+                ShuffleChanged(_, _) => self.settings.shuffle_notification_timeout(),
+                _ => self.settings.timeout(),
+            } as i32
+                * 1000,
+        );
     }
 }

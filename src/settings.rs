@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 pub const NOTIFICATION_TIMEOUT: u8 = 5;
 pub const NOTIFICATION_BODY: &str =
-    "<b>Playing:</b> {title} \n <b>album:</b> {album} \n <b>Artist:</b> {artist} - {year}";
+    "<b>Playing:</b> {title} \n <b>album:</b> {album} \n <b>Artist:</b> {artist} - {date}";
 pub const NOTIFICATION_SUMMARY: &str = "{title}";
 pub const NOTIFICATION_APP_NAME: &str = "C* Music Player";
 pub const DEFAULT_REMOTE_COMMAND: &str = "cmus-remote";

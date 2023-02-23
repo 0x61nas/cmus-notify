@@ -121,7 +121,7 @@ pub enum TrackCover {
     Embedded(image::DynamicImage),
     /// The cover is an external file.
     /// The `String` contains the absolute path of the external file.
-    External(image::DynamicImage),
+    External(String),
     /// The track does not have a cover.
     None,
 }
@@ -130,17 +130,20 @@ impl TrackCover {
     pub fn set_notification_image(&self, notification: &mut notify_rust::Notification) {
         use TrackCover::*;
         match self {
-            Embedded(cover) | External(cover) => {
+            Embedded(cover) => {
                 #[cfg(feature = "debug")]
                 debug!("Setting the cover as the notification image.");
                 let Ok(image) = notify_rust::Image::try_from(cover.clone()) else { return; };
                 notification.image_data(image);
             }
+            External(path) => {
+                #[cfg(feature = "debug")]
+                debug!("Setting the cover as the notification image.");
+                notification.image_path(path);
+            }
             None => {
                 #[cfg(feature = "debug")]
                 debug!("The track does not have a cover.");
-                // reset the notification image
-                notification.image_path("");
             }
         }
     }
@@ -188,11 +191,6 @@ pub fn track_cover(
         ) {
             #[cfg(feature = "debug")]
             info!("Found the external cover \"{cover}\".");
-            let Ok(cover) = image::open(cover) else {
-                #[cfg(feature = "debug")]
-                info!("Could not open the external cover.");
-                return TrackCover::None;
-            };
             return TrackCover::External(cover);
         }
     }

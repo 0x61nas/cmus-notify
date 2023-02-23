@@ -3,29 +3,30 @@ use clap::Parser;
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 
-pub const NOTIFICATION_TIMEOUT: u8 = 5;
-pub const NOTIFICATION_BODY: &str =
+const NOTIFICATION_TIMEOUT: u8 = 5;
+const NOTIFICATION_BODY: &str =
     "<b>Playing:</b> {title} \n <b>album:</b> {album} \n <b>Artist:</b> {artist} - {date}";
-pub const NOTIFICATION_SUMMARY: &str = "{title}";
-pub const NOTIFICATION_APP_NAME: &str = "C* Music Player";
-pub const DEFAULT_REMOTE_COMMAND: &str = "cmus-remote";
-pub const DEFAULT_MAX_DEPTH: u8 = 3;
-pub const DEFAULT_INTERVAL_TIME: u64 = 1000; // 1000 ms
-pub const DEFAULT_STATUS_CHANGE_NOTIFICATION_BODY: &str = "<b>{status}</b>";
-pub const DEFAULT_STATUS_CHANGE_NOTIFICATION_SUMMARY: &str = "Status changed";
-pub const DEFAULT_STATUS_CHANGE_NOTIFICATION_TIMEOUT: u8 = 1;
-pub const DEFAULT_VOLUME_CHANGE_NOTIFICATION_BODY: &str = "Volume changed to {volume}%";
-pub const DEFAULT_VOLUME_CHANGE_NOTIFICATION_SUMMARY: &str = "Volume changed";
-pub const DEFAULT_VOLUME_CHANGE_NOTIFICATION_TIMEOUT: u8 = 1;
-pub const DEFAULT_SHUFFLE_NOTIFICATION_BODY: &str = "Shuffle mode changed to {shuffle}";
-pub const DEFAULT_SHUFFLE_NOTIFICATION_SUMMARY: &str = "Shuffle mode changed";
-pub const DEFAULT_SHUFFLE_NOTIFICATION_TIMEOUT: u8 = 1;
-pub const DEFAULT_REPEAT_NOTIFICATION_BODY: &str = "Repeat mode changed to {repeat}";
-pub const DEFAULT_REPEAT_NOTIFICATION_SUMMARY: &str = "Repeat mode changed";
-pub const DEFAULT_REPEAT_NOTIFICATION_TIMEOUT: u8 = 1;
-pub const DEFAULT_AAAMODE_NOTIFICATION_BODY: &str = "AAA mode changed to {aaa_mode}";
-pub const DEFAULT_AAAMODE_NOTIFICATION_SUMMARY: &str = "AAA mode changed";
-pub const DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT: u8 = 1;
+const NOTIFICATION_SUMMARY: &str = "{title}";
+const NOTIFICATION_APP_NAME: &str = "C* Music Player";
+const DEFAULT_REMOTE_COMMAND: &str = "cmus-remote";
+const DEFAULT_MAX_DEPTH: u8 = 3;
+const DEFAULT_INTERVAL_TIME: u64 = 1000;
+// 1000 ms
+const DEFAULT_STATUS_CHANGE_NOTIFICATION_BODY: &str = "<b>{status}</b>";
+const DEFAULT_STATUS_CHANGE_NOTIFICATION_SUMMARY: &str = "Status changed";
+const DEFAULT_STATUS_CHANGE_NOTIFICATION_TIMEOUT: u8 = 1;
+const DEFAULT_VOLUME_CHANGE_NOTIFICATION_BODY: &str = "Volume changed to {volume}%";
+const DEFAULT_VOLUME_CHANGE_NOTIFICATION_SUMMARY: &str = "Volume changed";
+const DEFAULT_VOLUME_CHANGE_NOTIFICATION_TIMEOUT: u8 = 1;
+const DEFAULT_SHUFFLE_NOTIFICATION_BODY: &str = "Shuffle mode changed to {shuffle}";
+const DEFAULT_SHUFFLE_NOTIFICATION_SUMMARY: &str = "Shuffle mode changed";
+const DEFAULT_SHUFFLE_NOTIFICATION_TIMEOUT: u8 = 1;
+const DEFAULT_REPEAT_NOTIFICATION_BODY: &str = "Repeat mode changed to {repeat}";
+const DEFAULT_REPEAT_NOTIFICATION_SUMMARY: &str = "Repeat mode changed";
+const DEFAULT_REPEAT_NOTIFICATION_TIMEOUT: u8 = 1;
+const DEFAULT_AAAMODE_NOTIFICATION_BODY: &str = "AAA mode changed to {aaa_mode}";
+const DEFAULT_AAAMODE_NOTIFICATION_SUMMARY: &str = "AAA mode changed";
+const DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT: u8 = 1;
 #[cfg(feature = "lyrics")]
 const DEFAULT_LYRICS_NOTIFICATION_BODY: &str = "{lyrics}";
 #[cfg(feature = "lyrics")]

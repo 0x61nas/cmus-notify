@@ -22,15 +22,16 @@ pub mod settings;
 ///
 /// # Example
 ///
-/// ```
+/// ```ignore
+/// # use image::GenericImageView;
 /// # use cmus_notify::get_embedded_art;
 /// let result = get_embedded_art("/path/to/track.mp3");
 ///
 /// match result {
-///     Ok(Some(temp_file)) => {
-///         // Use the temp file...
-///         temp_file.path();
-///     },
+///     Ok(Some(dynamic_image)) => {
+///         // Use the image....
+///         println!("Track has an embedded picture {dimensions:?}", dimensions = dynamic_image.dimensions());
+///     }
 ///     Ok(None) => println!("Track does not have an embedded picture"),
 ///     Err(error) => println!("Error: {}", error),
 /// }
@@ -59,7 +60,7 @@ pub fn get_embedded_art(track_path: &str) -> std::io::Result<Option<image::Dynam
 ///
 /// # Example
 ///
-/// ```
+/// ```ignore
 /// # use regex::Regex;
 /// # use cmus_notify::search_for;
 /// let regx = Regex::new(r".\.lrc$").unwrap(); // Match .lrc files

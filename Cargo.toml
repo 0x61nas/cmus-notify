@@ -1,7 +1,33 @@
 [package]
 name = "cmus-notify"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
+authors = ["Anas Elgarhy <anas.elgarhy.dev@gmail.com>"]
+description = "A simple notification daemon for cmus"
+repository = "https://github.com/anas-elgarhy/cmus-notify"
+license = "MIT"
+keywords = [
+    "cmus",
+    "notify",
+    "notification",
+    "notification-cmus",
+    "notify-cmus",
+]
+categories = [
+    "command-line-utilities",
+    "multimedia"
+]
+exclude = [
+    "docs/*",
+    "tests/*",
+    "justfile",
+]
+include = [
+    "Cargo.toml",
+    "src/**/*",
+    "README.md",
+    "LICENSE",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

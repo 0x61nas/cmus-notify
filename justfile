@@ -1,5 +1,7 @@
 #!/usr/bin/env just --justfile
 
+alias b := build
+alias br := build-release
 alias r := run
 alias h := show-help
 alias t := test
@@ -20,8 +22,16 @@ check:
 lint:
   cargo clippy --all-features --all-targets -- -D warnings
 
+# Build the program with all features enabled
+build:
+  cargo build --all-features
+
+# Build the program with all features enabled in release mode
+build-release:
+  cargo build --all-features --release
+
 # Run the program with all features enabled and the debug profile
-run:
+run: build
   RUST_BACKTRACE=1 RUST_LOG=debug cargo run --all-features
 
 # Run the program with all features enabled and use the `--help` flag
@@ -41,4 +51,7 @@ coverage-report: coverage
     xdg-open ./target/coverage/report/index.html
 
 remove-config:
-  rm -rf ~/.config/cmus-notify/
+    rm -rf ~/.config/cmus-notify/
+
+markdown-help: build
+    cargo run --all-features -- --markdown-help > docs/usage.md

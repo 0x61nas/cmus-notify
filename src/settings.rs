@@ -251,6 +251,9 @@ pub struct Settings {
     /// The time out of the status change notification, in seconds.
     #[arg(short = 'Q', long)]
     status_notification_timeout: Option<u8>,
+    #[cfg(feature = "docs")]
+    #[arg(long, hide = true)]
+    markdown_help: bool
 }
 
 impl Default for Settings {
@@ -302,6 +305,8 @@ impl Default for Settings {
                 DEFAULT_STATUS_CHANGE_NOTIFICATION_SUMMARY.to_string(),
             ),
             status_notification_timeout: Some(DEFAULT_STATUS_CHANGE_NOTIFICATION_TIMEOUT),
+            #[cfg(feature = "docs")]
+            markdown_help: false
         }
     }
 }
@@ -315,7 +320,24 @@ impl Settings {
     #[inline(always)]
     pub fn load_config_and_parse_args() -> Self {
         #[cfg(feature = "debug")]
-        info!("Loading config and parsing args...");
+        info!("Parsing args...");
+
+        // parse the args
+        let args = Settings::parse();
+
+        #[cfg(feature = "docs")]
+        if args.markdown_help {
+            #[cfg(feature = "debug")]
+            info!("Printing help markdown...");
+            clap_markdown::print_help_markdown::<Settings>();
+            std::process::exit(0);
+        }
+
+        #[cfg(feature = "debug")]
+        {
+            info!("Loading config...");
+            debug!("Config file path: {:?}", confy::get_configuration_file_path("cmus-notify", "config"));
+        }
         // load config file
         let mut cfg: Self = match confy::load("cmus-notify", "config") {
             Ok(cfg) => cfg,
@@ -324,19 +346,10 @@ impl Settings {
                 Self::default()
             }
         };
-
-        #[cfg(feature = "debug")]
-        {
-            debug!("Config: {:?}", cfg);
-            info!("Parsing args...")
-        }
-
-        // parse the args
-        let args = Settings::parse();
-
         #[cfg(feature = "debug")]
         {
             debug!("Args: {:?}", args);
+            debug!("Config: {:?}", cfg);
             info!("Combining config and args...")
         }
 

@@ -19,6 +19,7 @@
 
 ## Development
 - This project is written in Rust, so you need to have Rust installed on your system, you can install Rust using [rustup](https://rustup.rs/)
+- You need to use the nightly version of Rust, you can install it using `rustup install nightly`, and then set it as the default toolchain using `rustup default nightly`
 - This project, like most Rust projects, uses `cargo` as the build system. But to make my life easier I decided to use [just][just] as a task runner, so you need to install `just` using `cargo install just`
 
 ### Just tasks

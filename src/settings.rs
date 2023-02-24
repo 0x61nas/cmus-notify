@@ -253,7 +253,7 @@ pub struct Settings {
     status_notification_timeout: Option<u8>,
     #[cfg(feature = "docs")]
     #[arg(long, hide = true)]
-    markdown_help: bool
+    markdown_help: bool,
 }
 
 impl Default for Settings {
@@ -306,7 +306,7 @@ impl Default for Settings {
             ),
             status_notification_timeout: Some(DEFAULT_STATUS_CHANGE_NOTIFICATION_TIMEOUT),
             #[cfg(feature = "docs")]
-            markdown_help: false
+            markdown_help: false,
         }
     }
 }
@@ -336,7 +336,10 @@ impl Settings {
         #[cfg(feature = "debug")]
         {
             info!("Loading config...");
-            debug!("Config file path: {:?}", confy::get_configuration_file_path("cmus-notify", "config"));
+            debug!(
+                "Config file path: {:?}",
+                confy::get_configuration_file_path("cmus-notify", "config")
+            );
         }
         // load config file
         let mut cfg: Self = match confy::load("cmus-notify", "config") {

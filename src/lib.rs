@@ -1,5 +1,3 @@
-#![feature(assert_matches)]
-
 use crate::cmus::{TemplateProcessor, Track};
 #[cfg(feature = "debug")]
 use log::{debug, info};
@@ -232,7 +230,6 @@ pub fn process_template_placeholders(
 mod tests {
     use super::*;
     use crate::cmus::player_settings::PlayerSettings;
-    use std::assert_matches::assert_matches;
     use std::str::FromStr;
     use test_context::{test_context, TestContext};
 
@@ -277,9 +274,12 @@ mod tests {
             &regex::Regex::new(r"cover|.\.jpg|.\.png").unwrap(),
         );
 
-        assert_matches!(cover_path, Ok(Some(_)));
+        // assert_matches!(cover_path, Ok(Some(_)));
+        assert!(cover_path.is_ok());
+        let cover_path = cover_path.unwrap();
+        assert!(cover_path.is_some());
         assert_eq!(
-            cover_path.unwrap().unwrap(),
+            cover_path.unwrap(),
             "tests/samples/Owl City/Cinematic/cover/cover.jpg"
         );
     }
@@ -292,9 +292,12 @@ mod tests {
             &regex::Regex::new(r".\.jpg|.\.png").unwrap(),
         );
 
-        assert_matches!(cover_path, Ok(Some(_)));
+        // assert_matches!(cover_path, Ok(Some(_)));
+        assert!(cover_path.is_ok());
+        let cover_path = cover_path.unwrap();
+        assert!(cover_path.is_some());
         assert_eq!(
-            cover_path.unwrap().unwrap(),
+            cover_path.unwrap(),
             "tests/samples/Owl City/Cinematic/cover/cover.jpg"
         );
     }
@@ -307,9 +310,12 @@ mod tests {
             &regex::Regex::new(r".\.png").unwrap(),
         );
 
-        assert_matches!(cover_path, Ok(Some(_)));
+        // assert_matches!(cover_path, Ok(Some(_)));
+        assert!(cover_path.is_ok());
+        let cover_path = cover_path.unwrap();
+        assert!(cover_path.is_some());
         assert_eq!(
-            cover_path.unwrap().unwrap(),
+            cover_path.unwrap(),
             "tests/samples/Owl City/Cinematic/cover/cover.png"
         );
     }
@@ -322,9 +328,12 @@ mod tests {
             &regex::Regex::new(r".\.lrc").unwrap(),
         );
 
-        assert_matches!(lrc_path, Ok(Some(_)));
+        // assert_matches!(lrc_path, Ok(Some(_)));
+        assert!(lrc_path.is_ok());
+        let lrc_path = lrc_path.unwrap();
+        assert!(lrc_path.is_some());
         assert_eq!(
-            lrc_path.unwrap().unwrap(),
+            lrc_path.unwrap(),
             "tests/samples/Owl City/Cinematic/08 - Always.lrc"
         );
     }
@@ -337,6 +346,9 @@ mod tests {
             &regex::Regex::new(r".\.mp3").unwrap(),
         );
 
-        assert_matches!(result, Ok(None));
+        // assert_matches!(result, Ok(None));
+        assert!(result.is_ok());
+        let result = result.unwrap();
+        assert!(result.is_none());
     }
 }

@@ -304,7 +304,6 @@ pub fn build_query_command(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::assert_matches::assert_matches;
 
     const OUTPUT_WITH_ALL_TAGS: &str =
         include_str!("../../tests/samples/cmus-remote-output-with-all-tags.txt");
@@ -329,7 +328,8 @@ mod tests {
     fn test_create_track_from_str() {
         let track = Track::from_str(OUTPUT_WITH_ALL_TAGS);
 
-        assert_matches!(track, Ok(_));
+        // assert_matches!(track, Ok(_));
+        assert!(track.is_ok());
 
         let track = track.unwrap();
 

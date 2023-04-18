@@ -54,13 +54,16 @@ fn main() {
     // Initialize the buffer to store the response from cmus, to compare it with the next one.
     let mut previous_response = CmusQueryResponse::default();
 
+    // Sleep for a 300ms before make the first query, 'cause if the demon linked with `cmus`
+    // and the demon is started before `cmus` with the suggested alias, the demon 'll start and exit before `cmus`
+    sleep!(300);
     loop {
         // Get the response from cmus.
         let Ok(response) = cmus::ping_cmus(&mut query_command) else {
             if link {
                 std::process::exit(0)
             } else {
-                // If the track info is the same as the previous one, just sleep for a while and try again.
+                // If there is no response and the `link` mode is not active, just sleep and try again
                 sleep!(interval);
                 continue;
             }
@@ -83,6 +86,7 @@ fn main() {
                 }
             }
         }
+        // If the track info is the same as the previous one, just sleep for a while.
         sleep!(interval);
     }
 }

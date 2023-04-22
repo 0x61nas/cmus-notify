@@ -8,6 +8,8 @@ This document contains the help content for the `cmus-notify` command-line progr
 
 ## `cmus-notify`
 
+A simple notification daemon for cmus
+
 **Usage:** `cmus-notify [OPTIONS] [BODY]`
 
 ###### **Arguments:**
@@ -53,6 +55,7 @@ This document contains the help content for the `cmus-notify` command-line progr
 * `-P`, `--status-notification-summary <STATUS_NOTIFICATION_SUMMARY>` — The status change notification summary. you can use the placeholders like "{status}" in the summary, it will be replaced with the aaa mode
 * `-Q`, `--status-notification-timeout <STATUS_NOTIFICATION_TIMEOUT>` — The time out of the status change notification, in seconds
 * `--markdown-help`
+* `--config <CONFIG_PATH>` — Use a custom config path
 
 
 

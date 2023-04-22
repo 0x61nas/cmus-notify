@@ -254,6 +254,10 @@ pub struct Settings {
     #[arg(long, hide = true)]
     #[serde(skip)]
     markdown_help: bool,
+    /// Use a custom config path
+    #[arg(long = "config")]
+    #[serde(skip)]
+    config_path: Option<String>,
 }
 
 impl Default for Settings {
@@ -307,6 +311,7 @@ impl Default for Settings {
             status_notification_timeout: Some(DEFAULT_STATUS_CHANGE_NOTIFICATION_TIMEOUT),
             #[cfg(feature = "docs")]
             markdown_help: false,
+            config_path: None,
         }
     }
 }
@@ -324,6 +329,7 @@ impl Settings {
 
         // parse the args
         let args = Settings::parse();
+        #[cfg(feature = "debug")] debug!("Args: {:?}", args);
 
         #[cfg(feature = "docs")]
         if args.markdown_help {
@@ -333,16 +339,19 @@ impl Settings {
             std::process::exit(0);
         }
 
+        let config_path = args.config_path.unwrap_or(
+            confy::get_configuration_file_path("cmus-notify", "config")
+                .unwrap().to_str().unwrap().to_string());
         #[cfg(feature = "debug")]
         {
             info!("Loading config...");
             debug!(
                 "Config file path: {:?}",
-                confy::get_configuration_file_path("cmus-notify", "config")
+                config_path
             );
         }
         // load config file
-        let mut cfg: Self = match confy::load("cmus-notify", "config") {
+        let mut cfg: Self = match confy::load_path(config_path) {
             Ok(cfg) => cfg,
             Err(err) => {
                 eprintln!("Failed to load config: {}", err);
@@ -351,7 +360,6 @@ impl Settings {
         };
         #[cfg(feature = "debug")]
         {
-            debug!("Args: {:?}", args);
             debug!("Config: {:?}", cfg);
             info!("Combining config and args...")
         }

@@ -1,30 +1,21 @@
-use crate::cmus::events::CmusEvent;
-use crate::cmus::player_settings::PlayerSettings;
-use crate::cmus::query::CmusQueryResponse;
-use crate::cmus::{TemplateProcessor, Track, TrackStatus};
-use crate::settings::Settings;
-use crate::{process_template_placeholders, settings, track_cover, TrackCover};
 #[cfg(feature = "debug")]
 use log::{debug, info};
 use notify_rust::Notification;
 
-pub enum Action {
-    Show,
-    Update,
-    None,
-}
+use crate::{process_template_placeholders, settings, track_cover, TrackCover};
+use crate::cmus::{TemplateProcessor, Track, TrackStatus};
+use crate::cmus::events::CmusEvent;
+use crate::cmus::player_settings::PlayerSettings;
+use crate::cmus::query::CmusQueryResponse;
+use crate::settings::Settings;
 
-impl Action {
-    pub fn max(self, other: Self) -> Self {
-        match (self, other) {
-            (Action::Show, Action::Show) => Action::Show,
-            (Action::Show, Action::Update) | (Action::Update, Action::Show | Action::Update) => {
-                Action::Update
-            }
-            (Action::None, _) => Action::None,
-            (_, Action::None) => Action::None,
-        }
-    }
+pub enum Action {
+    Show {
+        notification_body: String,
+        notification_summary: String,
+        save: bool,
+    },
+    None,
 }
 
 pub struct NotificationsHandler {
@@ -39,7 +30,7 @@ impl NotificationsHandler {
         Self {
             cover_set: false,
             notification: Notification::new(),
-            handlers: Vec::new(),
+            handlers: Vec::with_capacity(2),
             settings,
         }
     }
@@ -50,28 +41,31 @@ impl NotificationsHandler {
         events: Vec<CmusEvent>,
         response: &CmusQueryResponse,
     ) -> Result<(), notify_rust::error::Error> {
-        // Setup the notification cover
-        if self.settings.show_track_cover {
-            self.update_cover(&events[0], response);
-        } else if self.settings.notification_static_cover.is_some() && !self.cover_set {
-            self.setup_the_notification();
-            self.notification
-                .image_path(self.settings.notification_static_cover.as_ref().unwrap());
-            self.cover_set = true;
-        }
-
         for event in events {
             self.setup_notification_timeout(&event);
             #[cfg(feature = "debug")]
             info!("event: {:?}", event);
 
-            let action = event.build_notification(&mut self.settings, &mut self.notification);
+            match event.build_notification(&self.settings) {
+                Action::Show { notification_body, notification_summary, save } => {
+                    // Setup the notification cover
+                    if self.settings.show_track_cover {
+                        self.update_cover(&event, response);
+                    } else if self.settings.notification_static_cover.is_some() && !self.cover_set {
+                        self.setup_the_notification();
+                        self.notification
+                            .image_path(self.settings.notification_static_cover.as_ref().unwrap());
+                        self.cover_set = true;
+                    }
 
-            match action {
-                Action::Show => {
-                    let _ = self.notification.show()?;
+                    self.notification.summary(&notification_summary).body(&notification_body);
+
+                    // Show the notification
+                    let handle = self.notification.show()?;
+                    if save {
+                        self.handlers.push(handle);
+                    }
                 }
-                Action::Update => todo!("Update notification"),
                 Action::None => {}
             };
         }
@@ -80,10 +74,12 @@ impl NotificationsHandler {
     }
 
     #[inline(always)]
-    fn update_cover(&mut self, first_event: &CmusEvent, response: &CmusQueryResponse) {
+    fn update_cover(&mut self, event: &CmusEvent, response: &CmusQueryResponse) {
         // If the track is changed, we need to update the cover.
-        match first_event {
+        match event {
             CmusEvent::TrackChanged(track, _) => {
+                // Reset the notification
+                self.setup_the_notification();
                 self.set_cover(track);
             }
             _ => {
@@ -99,8 +95,6 @@ impl NotificationsHandler {
 
     #[inline]
     fn set_cover(&mut self, track: &Track) {
-        // Reset the notification
-        self.setup_the_notification();
         let path = match &self.settings.cover_path_template {
             Some(template) => track.process(template.clone()),
             None => track.path.clone(),
@@ -142,7 +136,7 @@ impl NotificationsHandler {
             match event {
                 TrackChanged(_, _) => self.settings.timeout(),
                 StatusChanged(_, _) => self.settings.status_notification_timeout(),
-                AAAMode(_, _) => self.settings.aaa_mode_notification_timeout(),
+                AAAModeChanged(_, _) => self.settings.aaa_mode_notification_timeout(),
                 VolumeChanged(_, _) => self.settings.volume_notification_timeout(),
                 RepeatChanged(_, _) => self.settings.repeat_notification_timeout(),
                 ShuffleChanged(_, _) => self.settings.shuffle_notification_timeout(),

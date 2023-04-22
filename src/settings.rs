@@ -3,7 +3,7 @@ use clap::Parser;
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 
-const NOTIFICATION_TIMEOUT: u8 = 5;
+const NOTIFICATION_TIMEOUT: i32 = 5;
 const NOTIFICATION_BODY: &str =
     "<b>album:</b> {album} \n <b>Artist:</b> {artist} - {date}";
 const NOTIFICATION_SUMMARY: &str = "{title}";
@@ -13,19 +13,19 @@ const DEFAULT_MAX_DEPTH: u8 = 3;
 const DEFAULT_INTERVAL_TIME: u64 = 1000; // 1000 ms
 const DEFAULT_STATUS_CHANGE_NOTIFICATION_BODY: &str = "<b>{status}</b>";
 const DEFAULT_STATUS_CHANGE_NOTIFICATION_SUMMARY: &str = "{title}";
-const DEFAULT_STATUS_CHANGE_NOTIFICATION_TIMEOUT: u8 = 1;
+const DEFAULT_STATUS_CHANGE_NOTIFICATION_TIMEOUT: i32 = 1;
 const DEFAULT_VOLUME_CHANGE_NOTIFICATION_BODY: &str = "Volume changed to {volume}%";
 const DEFAULT_VOLUME_CHANGE_NOTIFICATION_SUMMARY: &str = "{title}";
-const DEFAULT_VOLUME_CHANGE_NOTIFICATION_TIMEOUT: u8 = 1;
+const DEFAULT_VOLUME_CHANGE_NOTIFICATION_TIMEOUT: i32 = 1;
 const DEFAULT_SHUFFLE_NOTIFICATION_BODY: &str = "Shuffle mode changed to {shuffle}";
 const DEFAULT_SHUFFLE_NOTIFICATION_SUMMARY: &str = "{title}";
-const DEFAULT_SHUFFLE_NOTIFICATION_TIMEOUT: u8 = 1;
+const DEFAULT_SHUFFLE_NOTIFICATION_TIMEOUT: i32 = 1;
 const DEFAULT_REPEAT_NOTIFICATION_BODY: &str = "Repeat mode changed to {repeat}";
 const DEFAULT_REPEAT_NOTIFICATION_SUMMARY: &str = "{title}";
-const DEFAULT_REPEAT_NOTIFICATION_TIMEOUT: u8 = 1;
+const DEFAULT_REPEAT_NOTIFICATION_TIMEOUT: i32 = 1;
 const DEFAULT_AAAMODE_NOTIFICATION_BODY: &str = "AAA mode changed to {aaa_mode}";
 const DEFAULT_AAAMODE_NOTIFICATION_SUMMARY: &str = "{title}";
-const DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT: u8 = 1;
+const DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT: i32 = 1;
 #[cfg(feature = "lyrics")]
 const DEFAULT_LYRICS_NOTIFICATION_BODY: &str = "{lyrics}";
 #[cfg(feature = "lyrics")]
@@ -37,7 +37,7 @@ const DEFAULT_LYRICS_NOTIFICATION_SUMMARY: &str = "Lyrics";
 pub struct Settings {
     /// The notification timeout, in seconds
     #[arg(short, long)]
-    timeout: Option<u8>,
+    timeout: Option<i32>,
     /// Make the notification persistent, i.e. not disappear after a timeout (you can dismiss it manually)
     #[arg(short, long)]
     pub persistent: bool,
@@ -185,7 +185,7 @@ pub struct Settings {
     volume_notification_summary: Option<String>,
     /// The time out of the volume change notification, in seconds.
     #[arg(short = 'T', long)]
-    volume_notification_timeout: Option<u8>,
+    volume_notification_timeout: Option<i32>,
     /// The shuffle mode change notification body.
     /// you can use the placeholders like "{shuffle}" in the body, it will be replaced with the shuffle mode.
     ///
@@ -198,7 +198,7 @@ pub struct Settings {
     shuffle_notification_summary: Option<String>,
     /// The time out of the shuffle mode change notification, in seconds.
     #[arg(short = 'Y', long)]
-    shuffle_notification_timeout: Option<u8>,
+    shuffle_notification_timeout: Option<i32>,
     /// The repeat mode change notification body.
     /// you can use the placeholders like "{repeat}" in the body, it will be replaced with the repeat mode.
     ///
@@ -211,7 +211,7 @@ pub struct Settings {
     repeat_notification_summary: Option<String>,
     /// The time out of the repeat mode change notification, in seconds.
     #[arg(short = 'H', long)]
-    repeat_notification_timeout: Option<u8>,
+    repeat_notification_timeout: Option<i32>,
     /// The aaa mode change notification body.
     /// you can use the placeholders like "{aaa_mode}" in the body, it will be replaced with the aaa mode.
     ///
@@ -224,7 +224,7 @@ pub struct Settings {
     aaa_mode_notification_summary: Option<String>,
     /// The time out of the aaa mode change notification, in seconds.
     #[arg(short = 'F', long)]
-    aaa_mode_notification_timeout: Option<u8>,
+    aaa_mode_notification_timeout: Option<i32>,
     #[cfg(feature = "lyrics")]
     /// The lyrics notification body, if you want to show the lyrics separate notification.
     /// you can use the placeholders like "{lyrics}" in the body, it will be replaced with the lyrics.
@@ -249,7 +249,7 @@ pub struct Settings {
     status_notification_summary: Option<String>,
     /// The time out of the status change notification, in seconds.
     #[arg(short = 'Q', long)]
-    status_notification_timeout: Option<u8>,
+    status_notification_timeout: Option<i32>,
     #[cfg(feature = "docs")]
     #[arg(long, hide = true)]
     #[serde(skip)]
@@ -443,7 +443,7 @@ impl Settings {
     }
 
     #[inline(always)]
-    pub fn timeout(&self) -> u8 {
+    pub fn timeout(&self) -> i32 {
         self.timeout.unwrap_or(NOTIFICATION_TIMEOUT)
     }
 
@@ -490,7 +490,7 @@ impl Settings {
     }
 
     #[inline(always)]
-    pub fn status_notification_timeout(&self) -> u8 {
+    pub fn status_notification_timeout(&self) -> i32 {
         self.status_notification_timeout
             .unwrap_or(DEFAULT_STATUS_CHANGE_NOTIFICATION_TIMEOUT)
     }
@@ -528,7 +528,7 @@ impl Settings {
     }
 
     #[inline(always)]
-    pub fn volume_notification_timeout(&self) -> u8 {
+    pub fn volume_notification_timeout(&self) -> i32 {
         self.volume_notification_timeout
             .unwrap_or(DEFAULT_VOLUME_CHANGE_NOTIFICATION_TIMEOUT)
     }
@@ -550,7 +550,7 @@ impl Settings {
     }
 
     #[inline(always)]
-    pub fn shuffle_notification_timeout(&self) -> u8 {
+    pub fn shuffle_notification_timeout(&self) -> i32 {
         self.shuffle_notification_timeout
             .unwrap_or(DEFAULT_SHUFFLE_NOTIFICATION_TIMEOUT)
     }
@@ -572,7 +572,7 @@ impl Settings {
     }
 
     #[inline(always)]
-    pub fn repeat_notification_timeout(&self) -> u8 {
+    pub fn repeat_notification_timeout(&self) -> i32 {
         self.repeat_notification_timeout
             .unwrap_or(DEFAULT_REPEAT_NOTIFICATION_TIMEOUT)
     }
@@ -594,7 +594,7 @@ impl Settings {
     }
 
     #[inline(always)]
-    pub fn aaa_mode_notification_timeout(&self) -> u8 {
+    pub fn aaa_mode_notification_timeout(&self) -> i32 {
         self.aaa_mode_notification_timeout
             .unwrap_or(DEFAULT_AAAMODE_NOTIFICATION_TIMEOUT)
     }

@@ -22,34 +22,35 @@ impl CmusEvent {
         settings: &Settings,
     ) -> Action {
         use CmusEvent::*;
-        let (body_template, summary_template, track, player_settings) = match self {
+        let (body_template, summary_template, timeout, track, player_settings) = match self {
             StatusChanged(track, player_settings) =>
-                (settings.status_notification_body(), settings.status_notification_summary(), track, player_settings),
+                (settings.status_notification_body(), settings.status_notification_summary(), settings.status_notification_timeout(), track, player_settings),
             TrackChanged(track, player_settings) =>
-                (settings.body(), settings.summary(), track, player_settings),
+                (settings.body(), settings.summary(), settings.timeout(), track, player_settings),
             VolumeChanged(track, player_settings) if settings.show_player_notifications =>
-                (settings.volume_notification_body(), settings.volume_notification_summary(), track, player_settings),
+                (settings.volume_notification_body(), settings.volume_notification_summary(), settings.volume_notification_timeout(), track, player_settings),
             ShuffleChanged(track, player_settings) if settings.show_player_notifications =>
-                (settings.shuffle_notification_body(), settings.shuffle_notification_summary(), track, player_settings),
+                (settings.shuffle_notification_body(), settings.shuffle_notification_summary(), settings.shuffle_notification_timeout(), track, player_settings),
             RepeatChanged(track, player_settings) if settings.show_player_notifications =>
-                (settings.repeat_notification_body(), settings.repeat_notification_summary(), track, player_settings),
+                (settings.repeat_notification_body(), settings.repeat_notification_summary(), settings.repeat_notification_timeout(), track, player_settings),
             AAAModeChanged(track, player_settings) if settings.show_player_notifications =>
-                (settings.aaa_mode_notification_body(), settings.aaa_mode_notification_summary(), track, player_settings),
+                (settings.aaa_mode_notification_body(), settings.aaa_mode_notification_summary(), settings.aaa_mode_notification_timeout(), track, player_settings),
             _ => { return Action::None },
         };
         
         Action::Show {
-            notification_body: process_template_placeholders(
+            body: process_template_placeholders(
             body_template,
             track,
             player_settings,
         ),
-            notification_summary: process_template_placeholders(
+            summary: process_template_placeholders(
                 summary_template,
                 track,
                 player_settings,
             ),
-            save: false
+            timeout: timeout * 1000 ,
+            save: false,
         }
     }
 }

@@ -11,8 +11,9 @@ use crate::settings::Settings;
 
 pub enum Action {
     Show {
-        notification_body: String,
-        notification_summary: String,
+        body: String,
+        summary: String,
+        timeout: i32,
         save: bool,
     },
     None,
@@ -42,12 +43,11 @@ impl NotificationsHandler {
         response: &CmusQueryResponse,
     ) -> Result<(), notify_rust::error::Error> {
         for event in events {
-            self.setup_notification_timeout(&event);
             #[cfg(feature = "debug")]
             info!("event: {:?}", event);
 
             match event.build_notification(&self.settings) {
-                Action::Show { notification_body, notification_summary, save } => {
+                Action::Show { body, summary, timeout, save } => {
                     // Setup the notification cover
                     if self.settings.show_track_cover {
                         self.update_cover(&event, response);
@@ -58,7 +58,7 @@ impl NotificationsHandler {
                         self.cover_set = true;
                     }
 
-                    self.notification.summary(&notification_summary).body(&notification_body);
+                    self.notification.timeout(timeout).summary(&summary).body(&body);
 
                     // Show the notification
                     let handle = self.notification.show()?;
@@ -127,22 +127,5 @@ impl NotificationsHandler {
             .hint(notify_rust::Hint::Category("music".to_string()))
             .hint(notify_rust::Hint::DesktopEntry("cmus.desktop".to_string()))
             .hint(notify_rust::Hint::Resident(true));
-    }
-
-    #[inline(always)]
-    fn setup_notification_timeout(&mut self, event: &CmusEvent) {
-        use CmusEvent::*;
-        self.notification.timeout(
-            match event {
-                TrackChanged(_, _) => self.settings.timeout(),
-                StatusChanged(_, _) => self.settings.status_notification_timeout(),
-                AAAModeChanged(_, _) => self.settings.aaa_mode_notification_timeout(),
-                VolumeChanged(_, _) => self.settings.volume_notification_timeout(),
-                RepeatChanged(_, _) => self.settings.repeat_notification_timeout(),
-                ShuffleChanged(_, _) => self.settings.shuffle_notification_timeout(),
-                _ => self.settings.timeout(),
-            } as i32
-                * 1000,
-        );
     }
 }

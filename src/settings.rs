@@ -252,6 +252,7 @@ pub struct Settings {
     status_notification_timeout: Option<u8>,
     #[cfg(feature = "docs")]
     #[arg(long, hide = true)]
+    #[serde(skip)]
     markdown_help: bool,
 }
 

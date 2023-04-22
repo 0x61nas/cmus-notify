@@ -13,144 +13,68 @@ pub enum CmusEvent {
     PositionChanged(Track, PlayerSettings),
     ShuffleChanged(Track, PlayerSettings),
     RepeatChanged(Track, PlayerSettings),
-    AAAMode(Track, PlayerSettings),
+    AAAModeChanged(Track, PlayerSettings),
 }
 
 impl CmusEvent {
     pub fn build_notification(
         &self,
         settings: &Settings,
-        notification: &mut notify_rust::Notification,
+        _notification: &mut notify_rust::Notification,
     ) -> Action {
+        macro_rules! build_the_notification {
+            ($body_template: expr, $summary_template: expr, $track: expr, $player_settings: expr) => {
+                _notification.body(&process_template_placeholders(
+                    $body_template,
+                    $track,
+                    $player_settings,
+                ))
+                    .summary(&process_template_placeholders(
+                    $summary_template,
+                    $track,
+                    $player_settings,
+                ));
+            };
+        }
+
         use CmusEvent::*;
         match self {
-            StatusChanged(_, _) | TrackChanged(_, _) => {
-                let (body, body_action) = self.build_notification_body(settings);
-                let (summary, summary_action) = self.build_notification_summary(settings);
-                notification.body(&body).summary(&summary);
-                body_action.max(summary_action)
+            StatusChanged(track, player_settings) => {
+                build_the_notification!(settings.status_notification_body(), settings.status_notification_summary(), track, player_settings);
+
+                Action::Show
             }
-            VolumeChanged(_, _)
-            | PositionChanged(_, _)
-            | ShuffleChanged(_, _)
-            | RepeatChanged(_, _)
-            | AAAMode(_, _)
-                if settings.show_player_notifications =>
-            {
-                let (body, body_action) = self.build_notification_body(settings);
-                let (summary, summary_action) = self.build_notification_summary(settings);
-                notification.body(&body).summary(&summary);
-                body_action.max(summary_action)
+            TrackChanged(track, player_settings) => {
+                build_the_notification!(settings.body(), settings.summary(), track, player_settings);
+
+                Action::Show
+            }
+            VolumeChanged(track, player_settings) if settings.show_player_notifications => {
+                build_the_notification!(settings.volume_notification_body(), settings.volume_notification_summary(), track, player_settings);
+
+                Action::Show
+            }
+            PositionChanged(_track, _player_settings) if settings.show_player_notifications => {
+                //build_the_notification!(settings.volume_notification_body(), settings.volume_notification_summary(), track, player_settings);
+                //TODO: Implement this
+                Action::None
+            }
+            ShuffleChanged(track, player_settings) if settings.show_player_notifications => {
+                build_the_notification!(settings.shuffle_notification_body(), settings.shuffle_notification_summary(), track, player_settings);
+
+                Action::Show
+            }
+            RepeatChanged(track, player_settings) if settings.show_player_notifications => {
+                build_the_notification!(settings.repeat_notification_body(), settings.repeat_notification_summary(), track, player_settings);
+
+                Action::Show
+            }
+            AAAModeChanged(track, player_settings) if settings.show_player_notifications => {
+                build_the_notification!(settings.aaa_mode_notification_body(), settings.aaa_mode_notification_summary(), track, player_settings);
+
+                Action::Show
             }
             _ => Action::None,
-        }
-    }
-
-    #[inline]
-    fn build_notification_body(&self, settings: &Settings) -> (String, Action) {
-        use CmusEvent::*;
-        match self {
-            StatusChanged(track, player_settings) => (
-                process_template_placeholders(
-                    settings.status_notification_body(),
-                    track,
-                    player_settings,
-                ),
-                Action::Show,
-            ),
-            TrackChanged(track, player_settings) => (
-                process_template_placeholders(settings.body(), track, player_settings),
-                Action::Show,
-            ),
-            VolumeChanged(track, player_settings) => (
-                process_template_placeholders(
-                    settings.volume_notification_body(),
-                    track,
-                    player_settings,
-                ),
-                Action::Show,
-            ),
-            PositionChanged(_track, _player_settings) => {
-                (String::new(), Action::None) // TODO: Implement this
-            }
-            ShuffleChanged(track, player_settings) => (
-                process_template_placeholders(
-                    settings.shuffle_notification_body(),
-                    track,
-                    player_settings,
-                ),
-                Action::Show,
-            ),
-            RepeatChanged(track, player_settings) => (
-                process_template_placeholders(
-                    settings.repeat_notification_body(),
-                    track,
-                    player_settings,
-                ),
-                Action::Show,
-            ),
-            AAAMode(track, player_settings) => (
-                process_template_placeholders(
-                    settings.aaa_mode_notification_body(),
-                    track,
-                    player_settings,
-                ),
-                Action::Show,
-            ),
-        }
-    }
-
-    #[inline]
-    fn build_notification_summary(&self, settings: &Settings) -> (String, Action) {
-        use CmusEvent::*;
-        match self {
-            StatusChanged(track, player_settings) => (
-                process_template_placeholders(
-                    settings.status_notification_summary(),
-                    track,
-                    player_settings,
-                ),
-                Action::Show,
-            ),
-            TrackChanged(track, player_settings) => (
-                process_template_placeholders(settings.summary(), track, player_settings),
-                Action::Show,
-            ),
-            VolumeChanged(track, player_settings) => (
-                process_template_placeholders(
-                    settings.volume_notification_summary(),
-                    track,
-                    player_settings,
-                ),
-                Action::Show,
-            ),
-            PositionChanged(_track, _player_settings) => {
-                (String::new(), Action::None) // TODO: Implement this
-            }
-            ShuffleChanged(track, player_settings) => (
-                process_template_placeholders(
-                    settings.shuffle_notification_summary(),
-                    track,
-                    player_settings,
-                ),
-                Action::Show,
-            ),
-            RepeatChanged(track, player_settings) => (
-                process_template_placeholders(
-                    settings.repeat_notification_summary(),
-                    track,
-                    player_settings,
-                ),
-                Action::Show,
-            ),
-            AAAMode(track, player_settings) => (
-                process_template_placeholders(
-                    settings.aaa_mode_notification_summary(),
-                    track,
-                    player_settings,
-                ),
-                Action::Show,
-            ),
         }
     }
 }

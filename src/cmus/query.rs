@@ -141,7 +141,7 @@ impl CmusQueryResponse {
                     other_player_settings.aaa_mode, player_settings.aaa_mode
                 );
 
-                events.push(CmusEvent::AAAMode(
+                events.push(CmusEvent::AAAModeChanged(
                     other_track.clone(),
                     other_player_settings.clone(),
                 ));

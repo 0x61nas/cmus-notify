@@ -112,7 +112,7 @@ impl TemplateProcessor for Track {
             if let Some(value) = match key.as_str() {
                 "status" => Some(status.as_str()),
                 "title" => Some(self.get_name()),
-                _ => self.metadata.get(&key),
+                _ => self.metadata.get(key),
             } {
                 processed = processed.replace(&format!("{{{key}}}"), value);
             }
@@ -200,13 +200,13 @@ impl TrackMetadata {
     /// This function will assume you processed the first 4 lines, and remove them from the iterator.
     ///
     /// and also assume the all tags is contained in the iterator.
-    fn parse<'a>(mut lines: impl Iterator<Item = &'a str> + Debug) -> Self {
+    fn parse<'a>(lines: impl Iterator<Item = &'a str> + Debug) -> Self {
         #[cfg(feature = "debug")]
         info!("Parsing track metadata from lines: {:?}", lines);
 
         let mut tags = HashMap::new();
 
-        while let Some(line) = lines.next() {
+        for line in lines {
             #[cfg(feature = "debug")]
             debug!("Parsing line: {}", line);
             match line.trim().split_once(' ') {
@@ -240,7 +240,7 @@ impl Track {
                 .split('/')
                 .last()
                 .unwrap_or("")
-                .split_once(".")
+                .split_once('.')
                 .unwrap_or(("", ""))
                 .0
         })
@@ -268,7 +268,7 @@ pub fn ping_cmus(
     let output =
         String::from_utf8(output.stdout).map_err(|e| CmusError::UnknownError(e.to_string()))?;
 
-    CmusQueryResponse::from_str(&output).map_err(|e| CmusError::UnknownError(e.to_string()))
+    CmusQueryResponse::from_str(&output).map_err(CmusError::UnknownError)
 }
 
 /// Build the query command.

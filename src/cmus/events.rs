@@ -1,6 +1,6 @@
-use crate::{process_template_placeholders, settings};
-use crate::cmus::{Track, TrackStatus};
-use crate::cmus::player_settings::{AAAMode, PlayerSettings, Shuffle};
+use crate::{process_template_placeholders};
+use crate::cmus::{Track};
+use crate::cmus::player_settings::{PlayerSettings};
 use crate::notification::Action;
 use crate::settings::Settings;
 

@@ -170,9 +170,9 @@ pub fn track_cover(
     }
 
     if !no_use_external_cover {
-        let (Ok(regx), path) = (match path.split("/").last() {
+        let (Ok(regx), path) = (match path.split('/').last() {
             Some(last_pat) if last_pat.contains("r#") => {
-                (regex::Regex::new(&*last_pat.replace("r#", "")),
+                (regex::Regex::new(&last_pat.replace("r#", "")),
                 // Remove the last part of the path
                 path.remove(path.len() - last_pat.len() - 1).to_string())
             }

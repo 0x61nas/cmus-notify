@@ -1,8 +1,7 @@
 use cmus_notify::{
-    cmus::{self, events::CmusEvent, query::CmusQueryResponse},
-    notification, settings,
+    cmus::{self, query::CmusQueryResponse},
+    notification,
     settings::Settings,
-    track_cover, TrackCover,
 };
 
 #[cfg(feature = "debug")]

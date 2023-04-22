@@ -71,8 +71,8 @@ impl CmusQueryResponse {
                 #[cfg(feature = "debug")]
                 debug!("Track changed: {:?} -> {:?}", other_track, track);
                 events.push(CmusEvent::TrackChanged(
-                    other_track.clone(),
-                    other_player_settings.clone(),
+                    other_track,
+                    other_player_settings,
                 ));
                 // We don't need to check for other changes, since the track changed.
                 return Ok(events);
@@ -93,7 +93,7 @@ impl CmusQueryResponse {
                     other_track.position, track.position
                 );
                 events.push(CmusEvent::PositionChanged(
-                    track.clone(),
+                    track,
                     other_player_settings.clone(),
                 ));
             }
@@ -244,8 +244,8 @@ mod tests {
         let player_settings = player_settings.unwrap();
 
         assert_eq!(player_settings.aaa_mode, AAAMode::All);
-        assert_eq!(player_settings.repeat, true);
-        assert_eq!(player_settings.repeat_current, false);
+        assert!(player_settings.repeat);
+        assert!(!player_settings.repeat_current);
         assert_eq!(player_settings.shuffle, Shuffle::Off);
         assert_eq!(player_settings.volume.left, 17);
         assert_eq!(player_settings.volume.right, 17);

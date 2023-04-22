@@ -1,11 +1,11 @@
 #[cfg(feature = "debug")]
-use log::{debug, info};
+use log::{info};
 use notify_rust::Notification;
 
-use crate::{process_template_placeholders, settings, track_cover, TrackCover};
-use crate::cmus::{TemplateProcessor, Track, TrackStatus};
+use crate::{track_cover, TrackCover};
+use crate::cmus::{TemplateProcessor, Track};
 use crate::cmus::events::CmusEvent;
-use crate::cmus::player_settings::PlayerSettings;
+
 use crate::cmus::query::CmusQueryResponse;
 use crate::settings::Settings;
 

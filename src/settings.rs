@@ -373,7 +373,7 @@ impl Settings {
             .or(cfg.notification_static_cover);
         cfg.cover_path_template = args.cover_path_template.or(cfg.cover_path_template);
         #[cfg(feature = "lyrics")]
-        if args.lyrics_path != None {
+        if args.lyrics_path.is_some() {
             #[cfg(feature = "debug")]
             debug!("The user not override the lyrics_path, using the config's lyrics_path. lyrics_path: {:?}", cfg.lyrics_path);
             cfg.lyrics_path = args.lyrics_path;

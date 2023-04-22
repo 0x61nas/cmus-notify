@@ -123,7 +123,7 @@ impl FromStr for PlayerSettings {
             debug!("Parsing line: {}", line);
             if line.starts_with("set ") {
                 let line = &line[4..];
-                let (key, value) = line.split_once(" ").ok_or(CmusError::UnknownError(
+                let (key, value) = line.split_once(' ').ok_or(CmusError::UnknownError(
                     "Corrupted cmus response".to_string(),
                 ))?;
 

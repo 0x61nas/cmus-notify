@@ -15,11 +15,10 @@
 - Run `cmus-notify` in your terminal to start the program, the program will run in the background and will notify you about cmus status changes
 - You can also run `cmus-notify --help` to see the available options, also you can see the available options in the [usage](./docs/usage.md)
 - You also have the ability to configure the program using a configuration file, you basically have the same options as the command line arguments, but you can also use the configuration file to set the default values for the command line arguments, the default configuration file path is `~/.config/cmus-notify/config.toml`, you can also use the `--config` option to specify a custom configuration file path, the default config file will be created in `~/.config/cmus-notify/config.toml` if it doesn't exist
-- The recommended way to use the program is to run it in the background when you start the `cmus` music player, you can do that by creating an alias for `cmus` in your shell configuration file, e.g. `alias cmus="cmus & cmus-notify --link"`, the `--link` option will link the `cmus-notify` process to the `cmus` process, so when you close `cmus` the `cmus-notify` process will also be terminated
+- The recommended way to use the program is to run it in the background when you start the `cmus` music player, you can do that by creating an alias for `cmus` in your shell configuration file, e.g. `alias cmus="cmus-notify --link & cmus"`, the `--link` option will link the `cmus-notify` process to the `cmus` process, so when you close `cmus` the `cmus-notify` process will also be terminated
 
 ## Development
 - This project is written in Rust, so you need to have Rust installed on your system, you can install Rust using [rustup](https://rustup.rs/)
-- You need to use the nightly version of Rust, you can install it using `rustup install nightly`, and then set it as the default toolchain using `rustup default nightly`
 - This project, like most Rust projects, uses `cargo` as the build system. But to make my life easier I decided to use [just][just] as a task runner, so you need to install `just` using `cargo install just`
 
 ### Just tasks
@@ -30,7 +29,8 @@
 - You can use `just t`, to run `cargo test` with all the features enabled
 - You can use `just show-help`, to show the help message for the `cmus-notify` program
 - You can use `just coverage-report`, to generate a coverage report for the project, and open it in the default browser, the report will be generated in the `target/coverage` directory, this task requires [grcov][grcov] to be installed on your system
-You can see the all the available tasks and aliases in the [justfile](./justfile), or by running `just --list`
+
+> You can see the all the available tasks and aliases in the [justfile](./justfile), or by running `just --list`
 
 
 [repo]: https://github.com/anas-elgarhy/cmus-notify

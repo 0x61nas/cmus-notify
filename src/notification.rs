@@ -1,18 +1,18 @@
 #[cfg(feature = "debug")]
-use log::{info};
+use log::info;
 use notify_rust::Notification;
 
-use crate::{track_cover, TrackCover};
+use crate::{CompleteStr, track_cover, TrackCover};
 use crate::cmus::{TemplateProcessor, Track};
 use crate::cmus::events::CmusEvent;
-
+use crate::cmus::player_settings::PlayerSettings;
 use crate::cmus::query::CmusQueryResponse;
 use crate::settings::Settings;
 
 pub enum Action {
     Show {
-        body: String,
-        summary: String,
+        body: CompleteStr,
+        summary:CompleteStr,
         timeout: i32,
         save: bool,
     },
@@ -22,8 +22,25 @@ pub enum Action {
 pub struct NotificationsHandler {
     cover_set: bool,
     notification: Notification,
-    handlers: Vec<notify_rust::NotificationHandle>,
+    notifications: Vec<CmusNotification>,
     settings: Settings,
+}
+
+struct CmusNotification {
+    body_template: String,
+    summary_template: String,
+    visible: bool,
+    handle: notify_rust::NotificationHandle
+}
+
+impl CmusNotification {
+    #[inline(always)]
+    fn update(&mut self, track: &Track, player_settings: &PlayerSettings) {
+        use crate::process_template_placeholders;
+        self.handle.summary(&process_template_placeholders(self.summary_template.clone(), track, player_settings))
+            .body(&process_template_placeholders(self.body_template.clone(), track, player_settings));
+        self.handle.update();
+    }
 }
 
 impl NotificationsHandler {
@@ -31,7 +48,7 @@ impl NotificationsHandler {
         Self {
             cover_set: false,
             notification: Notification::new(),
-            handlers: Vec::with_capacity(2),
+            notifications: Vec::with_capacity(2),
             settings,
         }
     }
@@ -46,6 +63,22 @@ impl NotificationsHandler {
             #[cfg(feature = "debug")]
             info!("event: {:?}", event);
 
+            if let CmusEvent::PositionChanged(track, player_settings) = &event {
+                for notification in &mut self.notifications {
+                    if notification.visible {
+                        notification.update(track, player_settings);
+                    }
+                }
+                continue;
+            } else if let CmusEvent::TrackChanged(_, _) = &event {
+                for notification in &mut self.notifications {
+                    notification.handle.timeout = 2.into(); // Hide the notification after 2 millisecond
+                    notification.handle.update();
+                }
+                // Clean the notifications vec
+                self.notifications.clear();
+            }
+
             match event.build_notification(&self.settings) {
                 Action::Show { body, summary, timeout, save } => {
                     // Setup the notification cover
@@ -58,12 +91,24 @@ impl NotificationsHandler {
                         self.cover_set = true;
                     }
 
-                    self.notification.timeout(timeout).summary(&summary).body(&body);
+                    self.notification.timeout(timeout).summary(&summary.str).body(&body.str);
 
                     // Show the notification
-                    let handle = self.notification.show()?;
+                    let mut handle = self.notification.show()?;
                     if save {
-                        self.handlers.push(handle);
+                        // Add the close handler
+                        /*handle.on_close(|reason| {
+
+                        });*/
+
+                        self.notifications.push(
+                            CmusNotification {
+                                body_template: body.template,
+                                summary_template: summary.template,
+                                visible: true,
+                                handle
+                            }
+                        )
                     }
                 }
                 Action::None => {}

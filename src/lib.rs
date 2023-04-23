@@ -112,6 +112,11 @@ pub fn search_for(
     }
 }
 
+pub struct CompleteStr {
+    pub template: String,
+    pub str: String
+}
+
 /// The cover of a track.
 #[derive(PartialEq)]
 #[cfg_attr(any(feature = "debug", test), derive(Debug))]

@@ -94,7 +94,7 @@ impl TemplateProcessor for Track {
     /// Process the template with the track metadata.
     /// The template is a string with placeholders that will be replaced with the track metadata.
     /// The unknown placeholders will be skipped (don't replaced with anything, because they are maybe placeholders for player settings).
-    #[inline(always)]
+    #[inline]
     fn process(&self, template: String) -> String {
         #[cfg(feature = "debug")]
         {
@@ -107,14 +107,14 @@ impl TemplateProcessor for Track {
         Self::get_keys(template.as_str()).iter().for_each(|key| {
             #[cfg(feature = "debug")]
             debug!("Replacing the placeholder {{{key}}} with its matching value.");
-            // Replace the key with their matching value if exists, if not replace with the empty string.
-            let status = self.status.to_string();
+            // Replace the key with their matching value if exists
             if let Some(value) = match key.as_str() {
-                "status" => Some(status.as_str()),
-                "title" => Some(self.get_name()),
-                _ => self.metadata.get(key),
+                "status" => Some(self.status.to_string()),
+                "title" => Some(self.get_name().to_string()),
+                "progress" => Some(format!("{:.2}/{:.2}", self.duration as f32 / 60.0, self.position as f32 / 60.0)),
+                _ => self.metadata.get(key).map(|r| r.to_string()),
             } {
-                processed = processed.replace(&format!("{{{key}}}"), value);
+                processed = processed.replace(&format!("{{{key}}}"), value.as_str());
             }
         });
 

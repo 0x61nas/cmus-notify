@@ -1,6 +1,6 @@
-use crate::{process_template_placeholders};
-use crate::cmus::{Track};
-use crate::cmus::player_settings::{PlayerSettings};
+use crate::{CompleteStr, process_template_placeholders};
+use crate::cmus::Track;
+use crate::cmus::player_settings::PlayerSettings;
 use crate::notification::Action;
 use crate::settings::Settings;
 
@@ -37,20 +37,47 @@ impl CmusEvent {
                 (settings.aaa_mode_notification_body(), settings.aaa_mode_notification_summary(), settings.aaa_mode_notification_timeout(), track, player_settings),
             _ => { return Action::None },
         };
-        
+
+        let persistent = is_mutable(&body_template) || is_mutable(&summary_template);
+
         Action::Show {
-            body: process_template_placeholders(
-            body_template,
-            track,
-            player_settings,
-        ),
-            summary: process_template_placeholders(
-                summary_template,
-                track,
-                player_settings,
-            ),
-            timeout: timeout * 1000 ,
-            save: false,
+            body: CompleteStr {
+                template: body_template.clone(),
+                str: process_template_placeholders(
+                    body_template,
+                    track,
+                    player_settings,
+                ),
+            },
+            summary: CompleteStr {
+                template: summary_template.clone(),
+                str: process_template_placeholders(
+                    summary_template,
+                    track,
+                    player_settings,
+                ),
+            },
+            timeout: if persistent { 0 } else { timeout * 1000 },
+            save: persistent,
         }
     }
+}
+
+fn is_mutable(template: &str) -> bool {
+        let mut key = String::new(); // Just a buffer to build the key.
+
+        for c in template.chars() {
+            if c == '{' {
+                key = String::new();
+            } else if c == '}' {
+                match key.as_str() {
+                    "lyrics" | "progress" | "progress_bar" => return true,
+                    _ => {}
+                }
+            } else {
+                key.push(c);
+            }
+        }
+
+    false
 }

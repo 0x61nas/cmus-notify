@@ -1,4 +1,4 @@
-# cmus-notify: This program is a cmus status notification tool written in Rust, which can be easily configured and used for different purposes. It provides notifications for track changes, status changes, volume, playing mood and more
+# cmus-notify: This program is a cmus status notification tool written in Rust, which can be easily configured and used for different purposes. It provides notifications for track changes, status changes, volume, playing mode and more
 
 ![track change notification](./screenshots/0.0.1_track_change_notify_1_cropped.png)
 ![another track change notification](./screenshots/0.0.1_track_change_notify_2_cropped.png)

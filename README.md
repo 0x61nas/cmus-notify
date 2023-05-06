@@ -36,7 +36,6 @@
 
 > You can see the all the available tasks and aliases in the [justfile](./justfile), or by running `just --list`
 
-[repo]: https://github.com/anas-elgarhy/cmus-notify
 [crates.io]: https://crates.io/crates/cmus-notify
 [aur package]: https://aur.archlinux.org/packages/cmus-notify/
 [just]: https://github.com/casey/just

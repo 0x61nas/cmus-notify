@@ -37,4 +37,4 @@
 [crates.io]: https://crates.io/crates/cmus-notify
 [aur package]: https://aur.archlinux.org/packages/cmus-notify/
 [just]: https://github.com/casey/just
-[grcov]:https://github.com/mozilla/grcov
+[grcov]: https://github.com/mozilla/grcov

@@ -10,7 +10,7 @@
 
 - You can install the latest release from [crates.io][crates.io] using `cargo install cmus-notify`
 - You can also install the latest version from the git repository using `cargo install --git https://github.com/anas-elgarhy/cmus-notify`
-- Or if you use Arch Linux, you can install the [AUR package][aur package] using your favorite AUR helper. e.g. `yay -S cmus-notify`
+- Or if you use Arch Linux, you can install the [AUR package][aur package] using your favorite AUR helper. e.g. `yay -S notify-cmus`
 
 ## Usage
 
@@ -37,6 +37,6 @@
 > You can see the all the available tasks and aliases in the [justfile](./justfile), or by running `just --list`
 
 [crates.io]: https://crates.io/crates/cmus-notify
-[aur package]: https://aur.archlinux.org/packages/cmus-notify/
+[aur package]: https://aur.archlinux.org/packages/notify-cmus/
 [just]: https://github.com/casey/just
 [grcov]: https://github.com/mozilla/grcov

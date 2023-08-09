@@ -38,7 +38,7 @@ lrc = { version = "0.1.7", optional = true }
 notify-rust = { version = "4.8.0", features = ["images"] }
 image = "0.24.7"
 regex = "1.8.4"
-typed-builder = "0.14.0"
+typed-builder = "0.15.2"
 log = { version = "0.4.19", optional = true }
 pretty_env_logger = { version = "0.5.0", optional = true }
 thiserror = "1.0.41"

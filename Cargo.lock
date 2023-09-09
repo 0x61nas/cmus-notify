@@ -997,12 +997,12 @@ checksum = "b5e6163cb8c49088c2c36f57875e58ccd8c87c7427f7fbd50ea6710b2f3f2e8f"
 
 [[package]]
 name = "lrc"
-version = "0.1.7"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3fd370ef90dd35da5a9b68c4d982cedccd130dbb6f6b5de4505531fd157b722"
+checksum = "ebdfe9790d2abe68b3cb4673de938bce2627c72ca55934c224e504d08fe4a05c"
 dependencies = [
  "educe",
- "lazy_static",
+ "once_cell",
  "regex",
  "unicase",
 ]

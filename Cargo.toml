@@ -60,4 +60,4 @@ debug = ["log", "pretty_env_logger"]
 docs = ["clap-markdown"]
 
 [dev-dependencies]
-test-context = "0.1.4"
+test-context = "0.3.0"

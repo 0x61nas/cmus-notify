@@ -36,7 +36,7 @@ serde = "1.0.195"
 id3 = "1.10.0"
 lrc = { version = "0.1.8", optional = true }
 notify-rust = { version = "4.10.0", features = ["images"] }
-image = "0.24.7"
+image = "0.25.0"
 regex = "1.10.2"
 typed-builder = "0.18.0"
 log = { version = "0.4.20", optional = true }

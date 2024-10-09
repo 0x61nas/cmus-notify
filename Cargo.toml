@@ -2,6 +2,7 @@
 name = "cmus-notify"
 version = "0.0.3"
 edition = "2021"
+rust-version = "1.80.1"
 authors = ["Anas Elgarhy <anas.elgarhy.dev@gmail.com>"]
 description = "A simple notification daemon for cmus"
 repository = "https://github.com/anas-elgarhy/cmus-notify"

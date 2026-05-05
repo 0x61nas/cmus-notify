@@ -441,7 +441,7 @@ dependencies = [
  "regex",
  "serde",
  "test-context",
- "thiserror 1.0.64",
+ "thiserror 2.0.18",
  "typed-builder",
 ]
 

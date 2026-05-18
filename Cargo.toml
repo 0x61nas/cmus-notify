@@ -51,7 +51,7 @@ version = "4.5"
 features = ["wrap_help", "cargo", "usage", "derive", "suggestions", "color"]
 
 [dependencies.confy]
-version = "0.6"
+version = "2.0"
 default-features = false
 features = ["toml_conf"]
 
